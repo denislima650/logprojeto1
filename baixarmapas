@@ -1,578 +1,116 @@
-    ##EXTRAÇÃO DE PRECIPITAÇÕES
-
-    ##LINHA
-    #0-177    -> GFS-SUITE
-    #180-328  -> GFS-ENS-SUITE
-    #335-462  -> ECMWF
-    #469-...  -> ECMWF-EPS
-
-import selenium
-import time
+import os, sys
+from time import sleep
 from selenium import webdriver
+from PIL import Image
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+import datetime
+data = datetime.datetime.today().strftime("%Y%m%d")
 import urllib.request
-##logando no site
-browser = webdriver.Chrome()
-browser.get('https://www.stormvistawxmodels.com/')
-login = browser.find_element(By.ID, 'edit-name')
-login.click()
-time.sleep(2)
-login.send_keys("cecl@uol.com.br")
-time.sleep(2)
-login = browser.find_element(By.ID, 'edit-pass')
-login.click()
-time.sleep(2)
-login.send_keys("Lutfalla2")
-login = browser.find_element(By.ID, 'edit-submit')
-login.click()
-time.sleep(4)
-##acessando submenus 00z 120h  \\GFS SUITE
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-#baixando 120
-img1 = browser.find_element(By.ID, 'time-0')#120
-img1.click()
-time.sleep(5)
-um = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\00z\120 gfs 120h.png")
-print(i120)
-time.sleep(5)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img2 = browser.find_element(By.ID, 'time-40')
-img2.click()
-time.sleep(5)
-dois = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\00z\240 gfs 120h.png")
-print(i240)
-time.sleep(5)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img3 = browser.find_element(By.XPATH, '//*[@id="time-80"]')#360
-time.sleep(4)
-img3.click()
-time.sleep(4)
-tres = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\00z\360 gfs 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-#06z
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img4 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img4.click()
-time.sleep(4)
-quatro = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\06z\120 gfs 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img5 = browser.find_element(By.XPATH, '//*[@id="time-40"]')#240
-time.sleep(4)
-img5.click()
-time.sleep(4)
-cinco = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\06z\240 gfs 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img6 = browser.find_element(By.XPATH, '//*[@id="time-80"]')
-time.sleep(4)
-img6.click()
-time.sleep(4)
-seis = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\06z\360 gfs 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-#12z
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img7 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img7.click()
-time.sleep(4)
-sete = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-time.sleep(4)
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\12z\120 gfs 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img8 = browser.find_element(By.XPATH, '//*[@id="time-40"]')#240
-time.sleep(4)
-img8.click()
-time.sleep(4)
-oito = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-time.sleep(4)
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\12z\240 gfs 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img9 = browser.find_element(By.XPATH, '//*[@id="time-80"]')#360
-time.sleep(4)
-img9.click()
-time.sleep(4)
-nove = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\12z\360 gfs 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-#18z
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-#baixando 120
-img10 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img10.click()
-time.sleep(4)
-dez = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\18z\120 gfs 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img11 = browser.find_element(By.XPATH, '//*[@id="time-40"]')#240
-time.sleep(4)
-img11.click()
-time.sleep(4)
-onze = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\18z\240 gfs 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img12 = browser.find_element(By.ID, 'time-80')
-time.sleep(4)
-img12.click()
-time.sleep(4)
-doze = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-SUITE\18z\360 gfs 120h.png")
-print(i360)
-time.sleep(4)
-
-
-##gfs-ens-suite
-##acessando submenus 00z 120h
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img13 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img13.click()
-time.sleep(4)
-treze = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\00z\120 gfs-ens-suite 120h.png")
-print(i120)
-time.sleep(2)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img14 = browser.find_element(By.XPATH, '//*[@id="time-32"]')#240
-time.sleep(4)
-img14.click()
-time.sleep(4)
-quatorze = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\00z\240 gfs-ens-suite 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img15 = browser.find_element(By.XPATH, '//*[@id="time-52"]')
-time.sleep(4)
-img15.click()
-time.sleep(4)
-quinze = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\00z\360 gfs-ens-suite 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-#06z
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img16 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img16.click()
-time.sleep(4)
-dezesseis = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\06z\120 gfs-ens-suite 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img17 = browser.find_element(By.XPATH, '//*[@id="time-32"]')
-time.sleep(4)
-img17.click()
-time.sleep(4)
-dezessete = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\06z\240 gfs-ens-suite 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img18 = browser.find_element(By.XPATH, '//*[@id="time-52"]')#360
-img18.click()
-time.sleep(4)
-dezoito = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\06z\360 gfs-ens-suite 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-#12z
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img19 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img19.click()
-time.sleep(3)
-dezenove = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\12z\120 gfs-ens-suite 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img20 = browser.find_element(By.XPATH, '//*[@id="time-32"]')
-time.sleep(4)
-img20.click()
-time.sleep(4)
-vinte = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\12z\240 gfs-ens-suite 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img21 = browser.find_element(By.XPATH, '//*[@id="time-52"]')
-time.sleep(4)
-img21.click()
-time.sleep(4)
-vinteum = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\12z\360 gfs-ens-suite 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-#18z
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-#baixando 120
-img22 = browser.find_element(By.ID, 'time-0')
-time.sleep(4)
-time.sleep(4)
-img22.click()
-time.sleep(4)
-vintedois = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\18z\120 gfs-ens-suite 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img23 = browser.find_element(By.XPATH, '//*[@id="time-32"]')
-time.sleep(4)
-img23.click()
-time.sleep(4)
-vintetres = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\18z\240 gfs-ens-suite 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/gfs-ens-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img24 = browser.find_element(By.XPATH, '//*[@id="time-52"]')
-time.sleep(4)
-img24.click()
-time.sleep(4)
-vintequatro = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\GFS-ENS-SUITE\18z\360 gfs-ens-suite 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-
-
-
-##ecmwf
-##acessando submenus 00z 120h
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img25 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img25.click()
-time.sleep(4)
-vintecinco = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\00z\120 ecmwf-suite 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img26 = browser.find_element(By.XPATH, '//*[@id="time-24"]')
-time.sleep(4)
-img26.click()
-time.sleep(4)
-vinteseis = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\00z\240 ecmwf-suite 120h.png")
-print(i240)
-time.sleep(4)
-
-
-
-
-#06z
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img27 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img27.click()
-time.sleep(4)
-vintesete = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\06z\120 ecmwf-suite 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img28 = browser.find_element(By.XPATH, '//*[@id="time-32"]')
-time.sleep(4)
-img28.click()
-time.sleep(4)
-vinteoito = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\06z\240 ecmwf-suite 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img29 = browser.find_element(By.XPATH, '//*[@id="time-52"]')#360
-img29.click()
-time.sleep(4)
-vintenove = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\06z\360 ecmwf-suite 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-#12z
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img30 = browser.find_element(By.ID, 'time-0')
-time.sleep(4)
-img30.click()
-time.sleep(4)
-trinta = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\12z\120 gfs 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img31 = browser.find_element(By.XPATH, '//*[@id="time-24"]')#
-time.sleep(4)
-img31.click()
-time.sleep(4)
-trintaeum = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\12z\240 ecmwf-suite 120h.png")
-print(i240)
-time.sleep(4)
-
-
-
-
-#18z
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-#baixando 120
-img33 = browser.find_element(By.ID, 'time-0')
-time.sleep(4)
-img33.click()
-time.sleep(3)
-trintaetres = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\18z\120 ecmwf-suite 120h.png")
-time.sleep(4)
-print(i120)
-time.sleep(2)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img34 = browser.find_element(By.XPATH, '//*[@id="time-32"]')
-time.sleep(4)
-img34.click()
-time.sleep(3)
-trintaequatro = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\18z\240 ecmwf-suite 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-suite/18z/brazil/3-120-hr-accumulated-qpf')
-img35 = browser.find_element(By.XPATH, '//*[@id="time-52"]')
-time.sleep(4)
-img35.click()
-time.sleep(4)
-trintaecinco = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-SUITE\18z\360 ecmwf-suite 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-
-
-
-##ecmwf-ECS-SUITE
-##acessando submenus 00z 120h
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-eps-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img36 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img36.click()
-time.sleep(4)
-trintaeseis = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-EPS-SUITE\00z\120 ecmwf-eps-suite 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-eps-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img37 = browser.find_element(By.XPATH, '//*[@id="time-20"]')
-time.sleep(4)
-img37.click()
-time.sleep(4)
-trintaesete = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-EPS-SUITE\00z\240 ecmwf-eps-suite 120h.png")
-print(i240)
-time.sleep(4)
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-eps-suite/00z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img38 = browser.find_element(By.XPATH, '//*[@id="time-40"]')
-time.sleep(4)
-img38.click()
-time.sleep(4)
-trintaeoito = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i360 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-EPS-SUITE\00z\360 ecmwf-eps-suite 120h.png")
-print(i360)
-time.sleep(4)
-
-
-
-#06z
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-eps-suite/06z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img39 = browser.find_element(By.ID, 'time-0')#120
-time.sleep(4)
-img39.click()
-time.sleep(4)
-trintaenove = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-EPS-SUITE\06z\120 ecmwf-eps-suite 120h.png")
-print(i120)
-time.sleep(4)
-
-
-#12z
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-eps-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-
-#baixando 120
-img41 = browser.find_element(By.ID, 'time-0')
-time.sleep(4)
-img41.click()
-time.sleep(4)
-quarentaeum = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-EPS-SUITE\12z\120 ecmwf-eps-suite 120h.png")
-print(i120)
-time.sleep(4)
-#baixando 240
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-eps-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img42 = browser.find_element(By.XPATH, '//*[@id="time-20"]')#
-time.sleep(4)
-img42.click()
-time.sleep(4)
-quarentaedois = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-EPS-SUITE\12z\240 ecmwf-eps-suite 120h.png")
-print(i240)
-time.sleep(4)
-
-
-
-#baixando 360
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-eps-suite/12z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-img46 = browser.find_element(By.XPATH, '//*[@id="time-40"]')#
-time.sleep(4)
-img46.click()
-time.sleep(4)
-quarentaeseis = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i240 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-EPS-SUITE\12z\360 ecmwf-eps-suite 120h.png")
-print(i240)
-time.sleep(4)
-
-
-
-#18z
-browser.get('https://www.stormvistawxmodels.com/sv/model/ecmwf-eps-suite/18z/brazil/3-120-hr-accumulated-qpf')
-time.sleep(4)
-#baixando 120
-img43 = browser.find_element(By.ID, 'time-0')
-time.sleep(4)
-img43.click()
-time.sleep(3)
-quarentaetres = browser.find_element(By.XPATH, '//*[@id="image-overlay-99"]')
-i120 = browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\PRECIPITAÇÕES\ECMWF-EPS-SUITE\18z\120 ecmwf-eps-suite 120h.png")
-time.sleep(4)
-print(i120)
-time.sleep(2)
-
-
-browser.close()
+class baixa_mapas:
+    def __init__(self):
+        self.browser = self.login_site()
+        self.dicionario = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
+                           'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'}, 'ecmwf-suite': {'120': '0', '240': '24'},
+                           'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'},
+                           'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
+        self.horario = ['00z', '12z']
+    def baixa_hoje(self, mapa[]):
+        if mapa==[]: mapa=self.dicionario.keys()
+        else:
+            for h in self.horario:
+                print(h)
+                for n, i in self.dicionario.items():
+                    print(n, i)
+                    if n == 'cmc-ens-suite':
+                        self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{n}/{h}/sa/3-120-hr-accumulated-qpf')
+                        self.idimage = '17'
+                    else:
+                        self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{n}/{h}/brazil/3-120-hr-accumulated-qpf')
+                        self.idimage = '99'
+                    sleep(4)
+                    try:
+                        for contador in ['120', '240', '360']:
+                            try:
+                                img1 = self.browser.find_element(By.ID, f"time-{i[contador]}")
+                                img1.click()
+                                sleep(4)
+                                um = self.browser.find_element(By.ID, f'image-overlay-{self.idimage}')
+                                Image1 = self.browser.get_screenshot_as_file(
+                                    r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                                Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                                croppedIm = Img.crop((65, 115, 1000, 985))
+                                root_directory = (
+                                    fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}')
+                                try:
+                                    os.mkdir(
+                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}')
+                                    croppedIm.save(
+                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}\{contador}.png')
+                                except Exception as erro:
+                                    print(erro)
+                                    croppedIm.save(
+                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}\{contador}.png')
+                            except Exception as erro:
+                                print(erro)
+                                print(f"NÃO TEM NADA AQUI NO {n} {h}-{n}")
+                                pass
+                    except:
+                        pass
+    def login_site(self):
+        ##logando no site
+        browser = webdriver.Chrome()
+        browser.get('https://www.stormvistawxmodels.com/')
+        login = browser.find_element(By.ID, 'edit-name')
+        login.click()
+        sleep(2)
+        login.send_keys("cecl@uol.com.br")
+        sleep(2)
+        login = browser.find_element(By.ID, 'edit-pass')
+        login.click()
+        sleep(2)
+        login.send_keys("Lutfalla2")
+        login = browser.find_element(By.ID, 'edit-submit')
+        login.click()
+        sleep(4)
+        return browser
+#mapas = baixa_mapas()
+#mapas.baixa_hoje()
+
+
+
+    def modelo2(self, m, h, t):
+        def __init__(self):
+            self.browser = self.login_site1()
+            if m == 'cmc-ens-suite':
+                self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/sa/3-120-hr-accumulated-qpf')
+                self.idimage = '17'
+            else:
+                self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/brazil/3-120-hr-accumulated-qpf')
+                self.idimage = '99'
+            sleep(4)
+            try:
+                img1 = self.browser.find_element(By.ID, f"time-0")
+                img1.click()
+                sleep(4)
+                um = self.browser.find_element(By.ID, f'image-overlay-{self.idimage}')
+                Image1 = self.browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                croppedIm = Img.crop((65, 115, 1000, 985))
+                root_directory = (
+                    fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}')
+                try:
+                    os.mkdir(
+                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}')
+                    croppedIm.save(
+                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}\{t}.png')
+                except Exception as erro:
+                    print(erro)
+                    croppedIm.save(
+                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}\{t}.png')
+            except Exception as erro:
+                print(erro)
+                print(f"NÃO TEM NADA AQUI")
+                pass
+mapas = baixa_mapas()
+mapas.modelo2('gfs-suite', '00z', '120')
