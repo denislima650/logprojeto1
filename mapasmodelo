@@ -1,0 +1,77 @@
+import os, sys
+from time import sleep
+from selenium import webdriver
+from PIL import Image
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import datetime
+data = datetime.datetime.today().strftime("%Y%m%d")
+import urllib.request
+class baixa_mapas:
+    def __init__(self):
+        self.browser = self.login_site()
+        self.dicionario = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
+                           'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'}, 'ecmwf-suite': {'120': '0', '240': '24'},
+                           'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'},
+                           'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
+        self.horario = ['00z', '12z']
+    def modelo_esp(self, m):
+            for h in self.horario:
+                print(h)
+                for n, i in self.dicionario.keys()
+                    print(n, i)
+                    if n == 'cmc-ens-suite':
+                        self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{n}/{h}/sa/3-120-hr-accumulated-qpf')
+                        self.idimage = '17'
+                    else:
+                        self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{n}/{h}/brazil/3-120-hr-accumulated-qpf')
+                        self.idimage = '99'
+                    sleep(4)
+                    try:
+                        for contador in ['120', '240', '360']:
+                            try:
+                                img1 = self.browser.find_element(By.ID, f"time-{i[contador]}")
+                                img1.click()
+                                sleep(4)
+                                um = self.browser.find_element(By.ID, f'image-overlay-{self.idimage}')
+                                Image1 = self.browser.get_screenshot_as_file(
+                                    r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                                Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                                croppedIm = Img.crop((65, 115, 1000, 985))
+                                root_directory = (
+                                    fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}')
+                                try:
+                                    os.mkdir(
+                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}')
+                                    croppedIm.save(
+                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}\{contador}.png')
+                                except Exception as erro:
+                                    print(erro)
+                                    croppedIm.save(
+                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}\{contador}.png')
+                            except Exception as erro:
+                                print(erro)
+                                print(f"NÃO TEM NADA AQUI NO {n} {h}-{n}")
+                                pass
+                    except:
+                        pass
+    def login_site(self):
+        ##logando no site
+        browser = webdriver.Chrome()
+        browser.get('https://www.stormvistawxmodels.com/')
+        login = browser.find_element(By.ID, 'edit-name')
+        login.click()
+        sleep(2)
+        login.send_keys("cecl@uol.com.br")
+        sleep(2)
+        login = browser.find_element(By.ID, 'edit-pass')
+        login.click()
+        sleep(2)
+        login.send_keys("Lutfalla2")
+        login = browser.find_element(By.ID, 'edit-submit')
+        login.click()
+        sleep(4)
+        return browser
+
+mapas = baixa_mapas()
+mapas.modelo_esp()
