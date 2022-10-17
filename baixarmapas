@@ -15,7 +15,7 @@ class baixa_mapas:
                            'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'},
                            'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
         self.horario = ['00z', '12z']
-    def baixa_hoje(self):
+    def todos_hoje(self):
             for h in self.horario:
                 print(h)
                 for n, i in self.dicionario.items():
@@ -73,8 +73,25 @@ class baixa_mapas:
         sleep(4)
         return browser
 
-
-    def modelo2(self, m, h, t):
+    def umodelo(self, m, h, t):
+            if t=='120':
+                self.idtime = '0'
+            elif t=='240':
+                if m == 'gfs-suite':
+                    self.idtime = '40'
+                elif m== 'gfs-ens-suite':
+                    self.idtime = '32'
+                elif m== 'ecmwf-suite':
+                    self.idtime = '24'
+                else:
+                    self.idtime = '20'
+            elif t == '360':
+                if m == 'gfs-suite':
+                    self.idtime = '80'
+                elif m== 'gfs-ens-suite':
+                    self.idtime = '52'
+                else:
+                    self.idtime = '20'
             try:
                 if m == 'cmc-ens-suite':
                     self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/sa/3-120-hr-accumulated-qpf')
@@ -84,7 +101,7 @@ class baixa_mapas:
                         f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/brazil/3-120-hr-accumulated-qpf')
                     self.idimage = '99'
                 sleep(4)
-                img1 = self.browser.find_element(By.ID, f"time-0")
+                img1 = self.browser.find_element(By.ID, f"time-{self.idtime}")
                 img1.click()
                 sleep(4)
                 um = self.browser.find_element(By.ID, f'image-overlay-{self.idimage}')
@@ -107,6 +124,5 @@ class baixa_mapas:
                 print(f"NÃO TEM NADA AQUI")
                 pass
 mapas = baixa_mapas()
-mapas.modelo2('gfs-suite', '00z', '120')
-#mapas = baixa_mapas()
-#mapas.baixa_hoje()
+mapas.umodelo('cmc-ens-suite', '12z', '120')
+#mapas.todos_hoje()
