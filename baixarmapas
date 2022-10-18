@@ -10,12 +10,16 @@ import urllib.request
 class baixa_mapas:
     def __init__(self):
         self.browser = self.login_site()
+        self.dictmodeloespecifico = {'gfs-suite':{'120': '0', '240': '40', '360': '80'}, 'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'},
+        'ecmwf-suite': {'120': '0', '240': '24'},'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'}, 'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
+
         self.dicionario = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
                            'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'}, 'ecmwf-suite': {'120': '0', '240': '24'},
                            'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'},
                            'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
         self.horario = ['00z', '12z']
-    def todos_hoje(self):
+
+    def todos_hoje(self): #baixa todos mapas do dicionário acima, de todos modelos
             for h in self.horario:
                 print(h)
                 for n, i in self.dicionario.items():
@@ -55,7 +59,7 @@ class baixa_mapas:
                                 pass
                     except:
                         pass
-    def login_site(self):
+    def login_site(self): #função responsável por fazer login no site
         ##logando no site
         browser = webdriver.Chrome()
         browser.get('https://www.stormvistawxmodels.com/')
@@ -73,7 +77,7 @@ class baixa_mapas:
         sleep(4)
         return browser
 
-    def umodelo(self, m, h, t):
+    def mapaesp(self, m, h, t): #baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
             if t=='120':
                 self.idtime = '0'
             elif t=='240':
@@ -123,6 +127,51 @@ class baixa_mapas:
                 print(erro)
                 print(f"NÃO TEM NADA AQUI")
                 pass
+
+    def modelo(self, m): ##baixa todos mapas de um modelo passado por parâmetro
+        self.modeloselecionado = self.dictmodeloespecifico[m]
+        for h in self.horario:
+            print(h)
+            for n, i in self.modeloselecionado.items():
+                print(n, i)
+                if m == 'cmc-ens-suite':
+                    self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/sa/3-120-hr-accumulated-qpf')
+                    self.idimage = '17'
+                else:
+                    self.browser.get(
+                        f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/brazil/3-120-hr-accumulated-qpf')
+                    self.idimage = '99'
+                sleep(4)
+                try:
+                    img1 = self.browser.find_element(By.ID, f"time-{i}")
+                    img1.click()
+                    sleep(4)
+                    um = self.browser.find_element(By.ID, f'image-overlay-{self.idimage}')
+                    Image1 = self.browser.get_screenshot_as_file(
+                        r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                    Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                    croppedIm = Img.crop((65, 115, 1000, 985))
+                    root_directory = (
+                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}')
+                    try:
+                        os.mkdir(
+                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}')
+                        croppedIm.save(
+                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}\{contador}.png')
+                    except Exception as erro:
+                        print(erro)
+                        croppedIm.save(
+                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}\{contador}.png')
+                except Exception as erro:
+                    print(erro)
+                    print(f"NÃO TEM NADA AQUI NO {n} {h}-{n}")
+                    pass
+                except:
+                    pass
+
+
 mapas = baixa_mapas()
-mapas.umodelo('cmc-ens-suite', '12z', '120')
-#mapas.todos_hoje()
+
+mapas.mapaesp('ecmwf-eps-suite', '00z', '120') #baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+mapas.todos_hoje() #baixa todos mapas do dicionário acima, de todos modelos
+mapas.modelo('gfs-ens-suite') ##baixa todos mapas de um modelo passado por parâmetro
