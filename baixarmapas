@@ -9,6 +9,7 @@ data = datetime.datetime.today().strftime("%Y%m%d")
 import urllib.request
 class baixa_mapas:
     def __init__(self):
+        self.tempo = sleep(4)
         self.idtime = 0
         self.browser = self.login_site()
         self.dictmodeloespecifico = {'gfs-suite':{'120': '0', '240': '40', '360': '80'}, 'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'},
@@ -20,16 +21,16 @@ class baixa_mapas:
         browser.get('https://www.stormvistawxmodels.com/')
         login = browser.find_element(By.ID, 'edit-name')
         login.click()
-        sleep(2)
+        self.tempo()
         login.send_keys("cecl@uol.com.br")
-        sleep(2)
+        self.tempo()
         login = browser.find_element(By.ID, 'edit-pass')
         login.click()
-        sleep(2)
+        self.tempo()
         login.send_keys("Lutfalla2")
         login = browser.find_element(By.ID, 'edit-submit')
         login.click()
-        sleep(4)
+        self.tempo()
         return browser
     def mapaesp(self, modelos, horario, mapas1): #baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
         for m in mapas1:
@@ -61,10 +62,10 @@ class baixa_mapas:
                             self.browser.get(
                                 f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{h}/brazil/3-120-hr-accumulated-qpf')
                             idimage = '99'
-                        sleep(4)
+                        self.tempo()
                         img1 = self.browser.find_element(By.ID, f"time-{self.idtime}")
                         img1.click()
-                        sleep(4)
+                        self.tempo()
                         um = self.browser.find_element(By.ID, f'image-overlay-{idimage}')
                         Image1 = self.browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
                         Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
