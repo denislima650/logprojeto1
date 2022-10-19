@@ -9,56 +9,11 @@ data = datetime.datetime.today().strftime("%Y%m%d")
 import urllib.request
 class baixa_mapas:
     def __init__(self):
+        self.idtime = 0
         self.browser = self.login_site()
         self.dictmodeloespecifico = {'gfs-suite':{'120': '0', '240': '40', '360': '80'}, 'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'},
         'ecmwf-suite': {'120': '0', '240': '24'},'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'}, 'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
-
-        self.dicionario = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
-                           'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'}, 'ecmwf-suite': {'120': '0', '240': '24'},
-                           'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'},
-                           'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
         self.horario = ['00z', '12z']
-
-    def todos_hoje(self): #baixa todos mapas do dicionário acima, de todos modelos
-            for h in self.horario:
-                print(h)
-                for n, i in self.dicionario.items():
-                    print(n, i)
-                    if n == 'cmc-ens-suite':
-                        self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{n}/{h}/sa/3-120-hr-accumulated-qpf')
-                        self.idimage = '17'
-                    else:
-                        self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{n}/{h}/brazil/3-120-hr-accumulated-qpf')
-                        self.idimage = '99'
-                    sleep(4)
-                    try:
-                        for contador in ['120', '240', '360']:
-                            try:
-                                img1 = self.browser.find_element(By.ID, f"time-{i[contador]}")
-                                img1.click()
-                                sleep(4)
-                                um = self.browser.find_element(By.ID, f'image-overlay-{self.idimage}')
-                                Image1 = self.browser.get_screenshot_as_file(
-                                    r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                                Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                                croppedIm = Img.crop((65, 115, 1000, 985))
-                                root_directory = (
-                                    fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}')
-                                try:
-                                    os.mkdir(
-                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}')
-                                    croppedIm.save(
-                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}\{contador}.png')
-                                except Exception as erro:
-                                    print(erro)
-                                    croppedIm.save(
-                                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{n}\{h}\{data}\{contador}.png')
-                            except Exception as erro:
-                                print(erro)
-                                print(f"NÃO TEM NADA AQUI NO {n} {h}-{n}")
-                                pass
-                    except:
-                        pass
     def login_site(self): #função responsável por fazer login no site
         ##logando no site
         browser = webdriver.Chrome()
@@ -76,102 +31,56 @@ class baixa_mapas:
         login.click()
         sleep(4)
         return browser
-
-    def mapaesp(self, m, h, t): #baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
-            if t=='120':
-                self.idtime = '0'
-            elif t=='240':
-                if m == 'gfs-suite':
-                    self.idtime = '40'
-                elif m== 'gfs-ens-suite':
-                    self.idtime = '32'
-                elif m== 'ecmwf-suite':
-                    self.idtime = '24'
-                else:
-                    self.idtime = '20'
-            elif t == '360':
-                if m == 'gfs-suite':
-                    self.idtime = '80'
-                elif m== 'gfs-ens-suite':
-                    self.idtime = '52'
-                else:
-                    self.idtime = '20'
-            try:
-                if m == 'cmc-ens-suite':
-                    self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/sa/3-120-hr-accumulated-qpf')
-                    self.idimage = '17'
-                else:
-                    self.browser.get(
-                        f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/brazil/3-120-hr-accumulated-qpf')
-                    self.idimage = '99'
-                sleep(4)
-                img1 = self.browser.find_element(By.ID, f"time-{self.idtime}")
-                img1.click()
-                sleep(4)
-                um = self.browser.find_element(By.ID, f'image-overlay-{self.idimage}')
-                Image1 = self.browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                croppedIm = Img.crop((65, 115, 1000, 985))
-                root_directory = (
-                    fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}')
-                try:
-                    os.mkdir(
-                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}')
-                    croppedIm.save(
-                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}\{t}.png')
-                except Exception as erro:
-                    print(erro)
-                    croppedIm.save(
-                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}\{t}.png')
-            except Exception as erro:
-                print(erro)
-                print(f"NÃO TEM NADA AQUI")
-                pass
-
-    def modelo(self, m): ##baixa todos mapas de um modelo passado por parâmetro
-        self.modeloselecionado = self.dictmodeloespecifico[m]
-        for h in self.horario:
-            print(h)
-            for n, i in self.modeloselecionado.items():
-                print(n, i)
-                if m == 'cmc-ens-suite':
-                    self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/sa/3-120-hr-accumulated-qpf')
-                    self.idimage = '17'
-                else:
-                    self.browser.get(
-                        f'https://www.stormvistawxmodels.com/sv/model/{m}/{h}/brazil/3-120-hr-accumulated-qpf')
-                    self.idimage = '99'
-                sleep(4)
-                try:
-                    img1 = self.browser.find_element(By.ID, f"time-{i}")
-                    img1.click()
-                    sleep(4)
-                    um = self.browser.find_element(By.ID, f'image-overlay-{self.idimage}')
-                    Image1 = self.browser.get_screenshot_as_file(
-                        r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                    Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                    croppedIm = Img.crop((65, 115, 1000, 985))
-                    root_directory = (
-                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}')
+    def mapaesp(self, modelos, horario, mapas1): #baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+        for m in mapas1:
+            for modelo in modelos:
+                for h in horario:
+                    if m=='120':
+                        self.idtime = '0'
+                    elif m == '240':
+                        if modelo == 'gfs-suite':
+                            self.idtime = '40'
+                        elif modelo== 'gfs-ens-suite':
+                            self.idtime = '32'
+                        elif modelo== 'ecmwf-suite':
+                            self.idtime = '24'
+                        else:
+                            self.idtime = '20'
+                    elif m == '360':
+                        if modelo == 'gfs-suite':
+                            self.idtime = '80'
+                        elif modelo== 'gfs-ens-suite':
+                            self.idtime = '52'
+                        else:
+                            self.idtime = '20'
                     try:
-                        os.mkdir(
-                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}')
-                        croppedIm.save(
-                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}\{contador}.png')
+                        if modelo == 'cmc-ens-suite':
+                            self.browser.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{h}/sa/3-120-hr-accumulated-qpf')
+                            idimage = '17'
+                        else:
+                            self.browser.get(
+                                f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{h}/brazil/3-120-hr-accumulated-qpf')
+                            idimage = '99'
+                        sleep(4)
+                        img1 = self.browser.find_element(By.ID, f"time-{self.idtime}")
+                        img1.click()
+                        sleep(4)
+                        um = self.browser.find_element(By.ID, f'image-overlay-{idimage}')
+                        Image1 = self.browser.get_screenshot_as_file(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                        Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                        croppedIm = Img.crop((65, 115, 1000, 985))
+                        root_directory = (fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{modelo}\{h}')
+                        try:
+                            os.mkdir(f'{root_directory}\{data}')
+                            croppedIm.save(f'{root_directory}\{data}\{m}-{modelo}.png')
+                        except:
+                            croppedIm.save(f'{root_directory}\{data}\{m}-{modelo}.png')
                     except Exception as erro:
                         print(erro)
-                        croppedIm.save(
-                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\mapas metereológicos\modelos\{m}\{h}\{data}\{contador}.png')
-                except Exception as erro:
-                    print(erro)
-                    print(f"NÃO TEM NADA AQUI NO {n} {h}-{n}")
-                    pass
-                except:
-                    pass
-
-
+                        print(f"NÃO TEM NADA AQUI")
+                        pass
 mapas = baixa_mapas()
-
-mapas.mapaesp('ecmwf-eps-suite', '00z', '120') #baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
-mapas.todos_hoje() #baixa todos mapas do dicionário acima, de todos modelos
-mapas.modelo('gfs-ens-suite') ##baixa todos mapas de um modelo passado por parâmetro
+mapas1 =['120', '240', '360']
+modelos=['gfs-ens-suite', 'ecmwf-suite']
+horario=['00z', '12z']
+mapas.mapaesp(modelos, horario, mapas1)
