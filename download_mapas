@@ -1,0 +1,82 @@
+import os, sys
+from time import sleep
+from selenium import webdriver
+from PIL import Image
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import datetime
+import urllib.request
+from time import sleep
+
+class operador_StormVista:
+    def __init__(self):
+        self.browser = webdriver.Chrome()
+        self.data = datetime.datetime.today().strftime("%Y%m%d")
+        self.browser = self.login_site()
+        self.dictmodeloespecifico = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
+                                     'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'},
+                                     'ecmwf-suite': {'120': '0', '240': '24'},
+                                     'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'},
+                                     'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
+
+    def login_site(self):  # função responsável por fazer login no site
+        ##logando no site
+        f = open(
+            r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\phantom_js\mapas_stormvista/login_stormvista.txt')
+        user, password = f.readline().split(';')
+        self.browser.get('https://www.stormvistawxmodels.com/')
+        login = self.browser.find_element(By.ID, 'edit-name')
+        login.click()
+        sleep(4)
+        login.send_keys(user)
+        sleep(4)
+        login = self.browser.find_element(By.ID, 'edit-pass')
+        login.click()
+        sleep(4)
+        login.send_keys(password)
+        login = self.browser.find_element(By.ID, 'edit-submit')
+        login.click()
+        sleep(4)
+        return self.browser
+
+    def mapaesp(self, modelos, horario,
+                mapas):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+        for mapa in mapas:
+            for modelo in modelos:
+                for hora in horario:
+                    mapas1 = self.dictmodeloespecifico[modelo]
+                    idtime = mapas1[mapa]
+                    try:
+                        if modelo == 'cmc-ens-suite':
+                            self.browser.get(
+                                f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
+                            idimage = '17'
+                        else:
+                            self.browser.get(
+                                f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/brazil/3-120-hr-accumulated-qpf')
+                            idimage = '99'
+                        sleep(4)
+                        img1 = self.browser.find_element(By.ID, f"time-{idtime}")
+                        img1.click()
+                        sleep(4)
+                        um = self.browser.find_element(By.ID, f'image-overlay-{idimage}')
+                        Image1 = self.browser.get_screenshot_as_file(
+                            r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                        Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                        croppedIm = Img.crop((65, 115, 1000, 985))
+                        root_directory = (
+                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\{modelo}\{hora}')
+                        try:
+                            os.mkdir(f'{root_directory}\{self.data}')
+                            croppedIm.save(f'{root_directory}\{self.data}\{modelo}.png')
+                        except:
+                            croppedIm.save(f'{root_directory}\{self.data}\{modelo}.png')
+                    except Exception as erro:
+                        print(erro)
+                        print(f"NÃO TEM NADA AQUI")
+                        pass
+mapas123 = operador_StormVista()
+mapas1 =['120']
+modelos=['gfs-suite']
+horario=['00z']
+mapas123.mapaesp(modelos, horario, mapas1)
