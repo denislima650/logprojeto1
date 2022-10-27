@@ -1,7 +1,4 @@
 # classe que inicializa o navegador
-import time
-
-
 class navegador():
     def __init__(self, nome_navegador):
         nome_navegador = nome_navegador.lower()
@@ -14,6 +11,8 @@ class navegador():
         self.isdir = self.os.path.isdir
         from operadores_locais import operador_local
         self.local = operador_local()
+        from time import sleep
+        self.sleep = sleep
         import selenium
         self.selenium = selenium
         from selenium.common.exceptions import NoSuchElementException
@@ -73,7 +72,7 @@ class navegador():
             )
         elif('geck' in nome_navegador):
             options = webdriver.FirefoxOptions()
-            options.add_argument("--headless")
+            #options.add_argument("--headless")
             options.add_argument('--disable-logging')
         if('chrome' in nome_navegador):
             self.driver = webdriver.Chrome(self.path_driver_exe, chrome_options = options)
@@ -146,7 +145,8 @@ class navegador():
     def checar_xpath(self, xpath):
         try:
             elemento = self.driver.find_element_by_xpath(xpath)
-        except self.NoSuchElementException:
+        except Exception as e:
+            print(e)
             return None
         return elemento
     
@@ -322,6 +322,11 @@ class navegador():
         if(delta > self.tempo_cookies): return False
         return True
     
+    #da refresh na pagina (F5)
+    def refresh(self):
+        self.driver.refresh()
+        self.time.sleep(10)
+        
     # abortar padrão
     def abortar_erro(self):
         print("ERRO")
@@ -695,9 +700,23 @@ class operador_ONS(navegador):
         self.escreve_input(elemento_barra_busca, termo_busca, enter = True)
         if('chrome' not in self.nome_navegador): self.time.sleep(5)
         xpath_botao_busca = '//*[@id="btnSearch"]'
-        botao_busca = self.checar_xpath(xpath_barra_busca)
+        botao_busca = self.checar_xpath(xpath_botao_busca)
+        self.refresh()
+        if((data_inicial is not None)&(data_final is not None)):
+            #data_inicial = self.formata_data(data_inicial)
+            #data_final = self.formata_data(data_final)
+            ret = self.insere_datas(data_inicial, data_final, busca = True)
+            print('datas inseridas com sucesso')
+            if(ret is None): return None
+        xpath_barra_busca = '//*[@id="tbSearch"]'
+        elemento_barra_busca = self.aguarda_elemento(xpath_barra_busca)
+        if(elemento_barra_busca is None): return None
+        self.escreve_input(elemento_barra_busca, termo_busca, enter = True)
+        if('chrome' not in self.nome_navegador): self.time.sleep(5)
+        xpath_botao_busca = '//*[@id="btnSearch"]'
+        botao_busca = self.checar_xpath(xpath_botao_busca)
         if(botao_busca is None): return None
-        if('phantom' in self.nome_navegador): botao_busca.click()
+        botao_busca.click()
         self.time.sleep(5)
     
     # procura documento padrão
@@ -1076,51 +1095,41 @@ class operador_CCEE(navegador):
             index += 1
         return None
 
-class operador_StormVista():
-    def __init__(self):
+class operador_StormVista(navegador):
+    def __init__(self, nome_navegador):
         from selenium import webdriver
-        from selenium.webdriver.firefox.options import Options
-        from selenium.webdriver.firefox.service import Service
-        options = Options()
-        service = Service('/home/ubuntu/Drivers/geckodriver')
-        options.add_argument('--headless')
-        """
-        options.add_argument("start-maximized")
-        options.add_argument("disable-infobars")
-        options.add_argument("--disable-extensions")
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-application-cache')
-        options.add_argument('--disable-gpu')
-        options.add_argument("--disable-dev-shm-usage")
-        """
-        try:
-            self.driver = webdriver.Chrome(options=options, service=service)
-        except Exception as e:
-            print(e)
-        self.data = self.date.datetime.today().strftime("%Y%m%d")
-        self.browser = self.driver
-        self.browser = self.login_site()
-        self.dictmodeloespecifico = {'gfs-suite':{'120': '0', '240': '40', '360': '80'}, 'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'},
-        'ecmwf-suite': {'120': '0', '240': '24'},'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'}, 'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
-    def login_site(self): #função responsável por fazer login no site
+        from selenium.webdriver.common.keys import Keys
+        import datetime
+        import urllib.request
+        navegador.__init__(self, nome_navegador=nome_navegador)
+        #self.driver = navegador.driver()
+        self.idtime = '0'
+        self.data = datetime.datetime.today().strftime("%Y%m%d")
+        self.dictmodeloespecifico = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
+                                     'gfs-ens-suite': {'120': '0', '240': '32', '360': '52'},
+                                     'ecmwf-suite': {'120': '0', '240': '24'},
+                                     'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'},
+                                     'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
+
+    def login_site(self):  # função responsável por fazer login no site
         ##logando no site
-        f = open(r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\phantom_js\mapas_stormvista/login_stormvista.txt')
+        f = open(
+            r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\phantom_js\mapas_stormvista/login_stormvista.txt')
         user, password = f.readline().split(';')
-        browser = self.driver
         self.driver.get('https://www.stormvistawxmodels.com/')
-        login = browser.find_element(self.By.ID, 'edit-name')
+        login = self.driver.find_element(self.By.ID, 'edit-name')
         login.click()
-        time.sleep(4)
+        self.sleep(4)
         login.send_keys(user)
-        time.sleep(4)
-        login = browser.find_element(self.By.ID, 'edit-pass')
+        self.sleep(4)
+        login = self.driver.find_element(self.By.ID, 'edit-pass')
         login.click()
-        time.sleep(4)
+        self.sleep(4)
         login.send_keys(password)
-        login = browser.find_element(self.By.ID, 'edit-submit')
+        login = self.driver.find_element(self.By.ID, 'edit-submit')
         login.click()
-        time.sleep(4)
-        return browser
+        self.sleep(4)
+        return self.driver
 
     def mapaesp(self, modelos, horario,
                 mapas):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
@@ -1128,38 +1137,36 @@ class operador_StormVista():
             for modelo in modelos:
                 for hora in horario:
                     mapas1 = self.dictmodeloespecifico[modelo]
-                    idtime = mapas1[mapa]
+                    self.idtime = mapas1[mapa]
                     try:
                         if modelo == 'cmc-ens-suite':
-                            self.browser.get(
+                            self.driver.get(
                                 f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
                             idimage = '17'
                         else:
-                            self.browser.get(
+                            self.driver.get(
                                 f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/brazil/3-120-hr-accumulated-qpf')
                             idimage = '99'
-                        time.sleep(4)
-                        img1 = self.browser.find_element(self.By.ID, f"time-{idtime}")
+                        self.sleep(4)
+                        img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
                         img1.click()
-                        time.sleep(4)
-                        um = self.browser.find_element(self.By.ID, f'image-overlay-{self.idimage}')
-                        Image1 = self.browser.get_screenshot_as_file(
+                        self.sleep(4)
+                        um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
+                        Image1 = self.driver.get_screenshot_as_file(
                             r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
                         Img = self.Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
                         croppedIm = Img.crop((65, 115, 1000, 985))
                         root_directory = (
-                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\{modelo}')
+                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\{modelo}\{hora}')
                         try:
                             self.os.mkdir(f'{root_directory}\{self.data}')
-                            croppedIm.save(f'{root_directory}\{self.data}\{mapa}-{modelo}.png')
+                            croppedIm.save(f'{root_directory}\{self.data}\{mapa}-{hora}-{modelo}.png')
                         except:
-                            croppedIm.save(f'{root_directory}\{self.data}\{mapa}-{modelo}.png')
+                            croppedIm.save(f'{root_directory}\{self.data}\{mapa}-{hora}-{modelo}.png')
+                            print(erro)
                     except Exception as erro:
                         print(erro)
                         print(f"NÃO TEM NADA AQUI")
                         pass
-mapas123 = operador_StormVista()
-mapas1 =['240']
-modelos=['gfs-ens-suite']
-horario=['12z']
-mapas123.mapaesp(modelos, horario, mapas1)
+
+
