@@ -1110,6 +1110,7 @@ class operador_StormVista(navegador):
                                      'ecmwf-suite': {'120': '0', '240': '24'},
                                      'ecmwf-eps-suite': {'120': '0', '240': '20', '360': '40'},
                                      'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
+        self.driver = self.login_site()
 
     def login_site(self):  # função responsável por fazer login no site
         ##logando no site
@@ -1152,9 +1153,9 @@ class operador_StormVista(navegador):
                         img1.click()
                         self.sleep(4)
                         um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
-                        Image1 = self.driver.get_screenshot_as_file(
-                            r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                        Img = self.Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
+                        x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
+                        Image1 = self.driver.get_screenshot_as_file(x)
+                        Img = self.Image.open(x)
                         croppedIm = Img.crop((65, 115, 1000, 985))
                         root_directory = (
                             fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\{modelo}\{hora}')
