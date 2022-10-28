@@ -60,10 +60,9 @@ class operador_StormVista:
                         img1.click()
                         sleep(4)
                         um = self.browser.find_element(By.ID, f'image-overlay-{idimage}')
-                        Image1 = self.browser.get_screenshot_as_file(
-                            r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                        Img = Image.open(r"C:\Log\OneDrive - GALAPAGOS CAPITAL\Documentos\recorte.png")
-                        croppedIm = Img.crop((65, 115, 1000, 985))
+                        x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
+                        Image1 = self.driver.get_screenshot_as_file(x)
+                        croppedIm = Image1.crop((65, 115, 1000, 985))
                         root_directory = (
                             fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\{modelo}\{hora}')
                         try:
