@@ -74,6 +74,8 @@ class navegador():
             options = webdriver.FirefoxOptions()
             #options.add_argument("--headless")
             options.add_argument('--disable-logging')
+            options.add_argument('--headless')
+
         if('chrome' in nome_navegador):
             self.driver = webdriver.Chrome(self.path_driver_exe, chrome_options = options)
         elif('phantom' in nome_navegador):
@@ -83,7 +85,6 @@ class navegador():
         self.action = ActionChains(self.driver)
         self.driver.set_window_size(1920, 1080)
         self.window_shape = (1920, 1080)
-        
         self.cookies = None
         self.horario_inicio_cookies = None
         
@@ -1152,12 +1153,12 @@ class operador_StormVista(navegador):
                         Img = self.Image.open(x)
                         croppedIm = Img.crop((80, 85, 1305, 980))
                         root_directory = (
-                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\geckodriver\mapas_stormvista\{modelo}')
+                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
                         try:
                             self.os.mkdir(f'{root_directory}\{self.data}')
-                            croppedIm.save(f'{root_directory}\{self.data}\{mapa}-{hora}-{modelo}.png')
+                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
                         except Exception as erro:
-                            croppedIm.save(f'{root_directory}\{self.data}\{mapa}-{hora}-{modelo}.png')
+                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
                             print(erro)
                     except Exception as erro:
                         print(erro)
