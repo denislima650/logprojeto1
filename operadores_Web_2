@@ -1189,7 +1189,7 @@ class operador_StormVista(navegador):
                         x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
                         Image1 = self.driver.get_screenshot_as_file(x)
                         Img = self.Image.open(x)
-                        croppedIm = Img.crop((80, 85, 1305, 980))
+                        croppedIm = Img.crop((60, 55, 900, 700))
                         root_directory = (
                             fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
                         try:
