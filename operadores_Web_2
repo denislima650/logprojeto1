@@ -1157,7 +1157,7 @@ class operador_StormVista(navegador):
                         self.sleep(4)
                         Image1 = self.driver.get_screenshot_as_file(x)
                         Img = self.Image.open(x)
-                        croppedIm = Img.crop((150, 85, 1100, 900))
+                        croppedIm = Img.crop((60, 55, 900, 700))
                         root_directory = (
                             fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
                         try:
