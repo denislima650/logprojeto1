@@ -1172,7 +1172,7 @@ class operador_StormVista(navegador):
                         pass
 
 
-    def rodadadodia(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+    def rodadazero(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
         for mapa in self.mapas2:
             for modelo in self.modelos2:
                 for hora in self.horario2:
@@ -1192,15 +1192,15 @@ class operador_StormVista(navegador):
                         croppedIm = Img.crop((60, 55, 900, 700))
                         root_directory = (
                             fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
-                        try:
+                        if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
                             self.os.mkdir(f'{root_directory}\{self.data}')
                             croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
-                        except Exception as erro:
+                            pass
+                        elif self.os.path.isdir(f'{root_directory}\{self.data}') is True:
                             croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
-                            print(erro)
-                    except Exception as erro:
-                        print(erro)
-                        print(f"NÃO TEM NENHUM MAPA AQUI")
+                            print("Imagem salva. Pasta já estava criada")
+                            pass
+                    except:
                         pass
 
 
