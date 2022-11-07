@@ -1,0 +1,1226 @@
+# classe que inicializa o navegador
+class navegador():
+    def __init__(self, nome_navegador):
+        nome_navegador = nome_navegador.lower()
+        self.nome_navegador = nome_navegador
+        # bibliotecas importantes
+        import requests, datetime, os, sys, pandas, time, shutil, pickle
+        self.rq, self.date, self.os, self.sys, self.pd, self.time, self.shutil, self.pk = requests, datetime, os, sys, pandas, time, shutil, pickle
+        self.join = self.os.path.join
+        self.listdir = self.os.listdir
+        self.isdir = self.os.path.isdir
+        import urllib.request
+        self.request = urllib.request
+        from operadores_locais import operador_local
+        self.local = operador_local()
+        from time import sleep
+        self.sleep = sleep
+        import selenium
+        self.selenium = selenium
+        from selenium.common.exceptions import NoSuchElementException
+        self.NoSuchElementException = NoSuchElementException
+        from selenium import webdriver
+        self.webdriver = webdriver
+        from selenium.webdriver.support.ui import Select
+        self.Select = Select
+        from selenium.webdriver.common.keys import Keys
+        self.Keys = Keys
+        from PIL import Image
+        self.Image = Image
+        from selenium.webdriver.common.by import By
+        self.By = By
+        import numpy
+        #
+        #from webdriver_manager.chrome import ChromeDriverManager
+        #
+        from selenium.webdriver.chrome.service import Service
+        self.Service = Service
+        from selenium.webdriver import ActionChains
+        # paths importantes
+        self.path_scripts = "C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Scripts/Preco/API"
+        self.path_drivers = self.path_scripts + "/Drivers"
+
+        # -----------------------------------------------
+        # procurando pasta com driver do navegador
+        pastas = self.listdir(self.path_drivers)
+        path_driver, path_driver_exe = None, None
+        for pasta in pastas:
+            path_pasta = self.join(self.path_drivers, pasta)
+            if(nome_navegador not in pasta): continue
+            if(self.isdir(path_pasta)):
+                files = self.listdir(path_pasta)
+                for file in files:
+                    path_file = self.join(path_pasta, file)
+                    if(self.isdir(path_file)): continue
+                    if((nome_navegador in file)&('.exe' in file)):
+                        path_driver = path_pasta
+                        path_driver_exe = path_file
+                        break
+            if(path_driver is not None): break
+        if(path_driver is None): return None
+        self.path_driver, self.path_driver_exe = path_driver, path_driver_exe
+        self.path_dados_driver = self.path_driver + "/Dados"
+        # inicia navegador
+        # setando opções para o navegador
+        if('chrome' in nome_navegador):
+            options = webdriver.ChromeOptions()
+            options.add_argument("--headless")
+            options.add_argument('--disable-logging')
+            options.add_experimental_option('prefs', {
+                "download.default_directory": self.path_dados_driver,
+                "download.prompt_for_download": False,
+                "download.directory_upgrade": True,
+                "safebrowsing.enabled": True
+                }
+            )
+        elif('geck' in nome_navegador):
+            options = webdriver.FirefoxOptions()
+            #options.add_argument("--headless")
+            options.add_argument('--disable-logging')
+            options.add_argument('--headless')
+
+
+        if('chrome' in nome_navegador):
+            self.driver = webdriver.Chrome(self.path_driver_exe, chrome_options = options)
+        elif('phantom' in nome_navegador):
+            self.driver = webdriver.PhantomJS(self.path_driver_exe)
+        elif('geck' in nome_navegador):
+            self.driver = webdriver.Firefox(executable_path = self.path_driver_exe, options = options)
+        self.action = ActionChains(self.driver)
+        self.driver.set_window_size(1920, 1080)
+        self.window_shape = (1920, 1080)
+        self.cookies = None
+        self.horario_inicio_cookies = None
+
+        self.meses_dict = {'JAN': 1, 'FEV': 2, 'MAR': 3, 'ABR': 4, 'MAI': 5, 'JUN': 6, 'JUL': 7,
+                        'AGO': 8, 'SET': 9, 'OUT': 10, 'NOV': 11, 'DEZ': 12}
+
+    # baixa arquivo através de um link em determinado path
+    def baixa_link(self, link_download, path_folder, nome_arquivo):
+        response = self.rq.get(link_download)
+        open(self.join(path_folder, nome_arquivo), 'wb').write(response.content)
+        self.time.sleep(1)
+
+    # retorna altura da página
+    def page_height(self):
+        height = self.driver.execute_script("return window.scrollY")
+        return height
+
+    # PAGE UP
+    def page_up(self):
+        html = self.driver.find_element_by_tag_name('html')
+        html.send_keys(self.Keys.PAGE_UP)
+        self.time.sleep(0.5)
+
+    # PAGE DOWN
+    def page_down(self):
+        html = self.driver.find_element_by_tag_name('html')
+        html.send_keys(self.Keys.PAGE_DOWN)
+        self.time.sleep(0.5)
+
+    # HOME PAGE
+    def page_home(self):
+        html = self.driver.find_element_by_tag_name('html')
+        html.send_keys(self.Keys.HOME)
+        self.time.sleep(0.5)
+
+    # END PAGE
+    def page_end(self):
+        html = self.driver.find_element_by_tag_name('html')
+        html.send_keys(self.Keys.END)
+        self.time.sleep(0.5)
+
+    # Scroll Down
+    def scroll_down(self):
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        #self.driver.execute_script("window.scrollTo(0, {Y})".format(Y = self.window_shape[1]))
+        self.time.sleep(0.5)
+
+    # Scroll Up
+    def scroll_up(self):
+        self.driver.execute_script("window.scrollTo(0, {Y})".format(Y = -self.window_shape[1]))
+        self.time.sleep(0.5)
+
+    # retorna lista com todos atributos de um elemento (executa script em javascript)
+    def atributos_elemento(self, elemento):
+        atributos = self.driver.execute_script('var items = {}; for (index = 0; index < arguments[0].attributes.length; ++index) { items[arguments[0].attributes[index].name] = arguments[0].attributes[index].value }; return items;', elemento)
+        return atributos
+
+    # verifica se xpath do elemento existe/pode ser acessado
+    def checar_xpath(self, xpath):
+        try:
+            elemento = self.driver.find_element_by_xpath(xpath)
+        except Exception as e:
+            print(e)
+            return None
+        return elemento
+
+    # aguarda até elemento estar disponível
+    def aguarda_elemento(self, xpath, tentativas = 3, tempo = 1):
+        elemento = None
+        contador = 0
+        while(True):
+            elemento = self.checar_xpath(xpath)
+            if(elemento is not None): return elemento
+            self.time.sleep(tempo)
+            print('tentativa ', contador)
+            contador += 1
+            if(contador >= tentativas): return None
+
+    # loop de scroll down/up até encontrar elemento, se chegar no limite e elemento não for encontrado, retornar None
+    # "sentido" -> ('up' ou inteiro > 0) ou ('down' ou inteiro <0)
+    def scroll_elemento(self, sentido, xpath_elemento, tempo_espera_scroll = 1, max_scroll = 50):
+        if((sentido != 'up')&(sentido != 'down')):
+            if(sentido >= 0): sentido = 'up'
+            else: sentido = 'down'
+        comando = 'self.page_{sentido}()'.format(sentido = sentido)
+        altura_0 = self.page_height()
+        elemento = self.aguarda_elemento(xpath_elemento)
+        if(elemento is not None):
+            print('elemento encontrado')
+            return elemento
+        n_scrolls = 0
+        while(elemento is None):
+            exec(comando)
+            altura_1 = self.page_height()
+            self.time.sleep(tempo_espera_scroll)
+            print('scroll ' + sentido)
+            print('da altura: ', altura_0, ' para altura: ', altura_1)
+            elemento = self.aguarda_elemento(xpath_elemento, tempo = 0.5)
+            if(elemento is not None):
+                print('elemento encontrado')
+                return elemento
+            if(altura_0 == altura_1):
+                print('fim da página, elemento não encontrado')
+                return None
+            altura_0 = altura_1
+            n_scrolls += 1
+            print('scrolls: ', 1)
+            if(n_scrolls >= max_scroll):
+                print('número máximo de "{max_scroll}" scrolls atingido'.format(max_scroll = max_scroll))
+
+    # formata data (formato date, ou 'yyyymmdd') em string no formato "dd/mm/yyyy"
+    def formata_data(self, data):
+        if(type(data) == type('string')):
+            data = data[-2:] +  '/' + data[4:6] + '/' + data[:4]
+            return data
+        data = data.strftime("%d/%m/%Y")
+        return data
+
+    # escreve string num campo de input; "clear" -> apaga se estiver algo escrito previamente
+    def escreve_input(self, elemento, texto, clear = True, enter = False):
+        if(clear): elemento.clear()
+        if('phantom' in self.nome_navegador): self.time.sleep(1)
+        self.time.sleep(0.5)
+        elemento.send_keys(texto)
+        if('phantom' in self.nome_navegador): self.time.sleep(1)
+        if(enter):
+            self.time.sleep(0.5)
+            elemento.send_keys(self.Keys.ENTER)
+            if('phantom' in self.nome_navegador): self.time.sleep(1)
+
+    # formata numero para que tenha correto tamanho com zeros à esquerda se necessário
+    def formata_numero(self, numero, tamanho):
+        numero = str(int(numero))
+        tamanho_numero = len(numero)
+        if(tamanho_numero < tamanho):
+            numero = '0'*(tamanho - tamanho_numero) + numero
+        return numero
+
+    # guarda cookies pelo nome da pasta
+    def guarda_cookies(self, nome_pasta, cookies, save_info = True):
+        if('phantom' in self.nome_navegador): return None
+        path_cookies = self.join(self.path_dados_driver, nome_pasta, 'cookies')
+        if(not self.os.path.exists(path_cookies)): self.os.mkdir(path_cookies)
+        dias = self.listdir(path_cookies)
+        hoje = self.date.date.today().strftime("%Y%m%d")
+        path_hoje = self.join(path_cookies, hoje)
+        if(hoje not in dias): self.os.mkdir(path_hoje)
+        logs = self.listdir(path_hoje)
+        if(len(logs) == 0): log_atual = '0'
+        else:
+            logs = sorted(logs)
+            last_log = logs[-1]
+            log_atual = str(int(last_log) + 1)
+        path_log = self.join(path_hoje, log_atual)
+        self.os.mkdir(path_log)
+        # registrando horário de início
+        agora = self.date.datetime.now()
+        horario_inicio = self.formata_horario(agora)
+        path_nota = self.join(path_log, 'nota.txt')
+        file = open(path_nota, 'w')
+        file.writelines([horario_inicio])
+        file.close()
+        # guardando cookies
+        path_cookies = self.join(path_log, 'cookies')
+        file = open(path_cookies, 'wb')
+        self.pk.dump(cookies, file)
+        # ------------
+        for cookie in cookies: print(cookie['name'], cookie['domain'], cookie['value'])
+        # ------------
+        file.close()
+        if(save_info):
+            self.cookies = cookies
+            self.horario_inicio_cookies = horario_inicio
+
+    # transforma datetime para horário no formato "hhmmss"
+    def formata_horario(self, horario):
+        if(type(horario) != type('string')):
+            hora, minuto, segundo = horario.hour, horario.minute, horario.second
+            horario = self.formata_numero(hora, 2) + self.formata_numero(minuto, 2) + self.formata_numero(segundo, 2)
+        return horario
+
+    # retorna diferença em segundos entre horários
+    def delta_horarios(self, horario1, horario2):
+        horario1 = self.formata_horario(horario1)
+        horario2 = self.formata_horario(horario2)
+        h1 = int(horario1[:2])*3600 + int(horario1[2:4])*60 + int(horario1[4:])
+        h2 = int(horario2[:2])*3600 + int(horario2[2:4])*60 + int(horario2[4:])
+        return h2 - h1
+
+    # avalia se carrega ou não os últimos cookies com base no horário e no tempo limite
+    def verifica_cookies(self, nome_pasta, tempo_limite, espera = 5, save_info = True):
+        path_cookies = self.join(self.path_dados_driver, nome_pasta, 'cookies')
+        if(not self.os.path.exists(path_cookies)): return False
+        dias = self.listdir(path_cookies)
+        hoje = self.date.date.today().strftime("%Y%m%d")
+        if(hoje not in dias): return False
+        path_hoje = self.join(path_cookies, hoje)
+        logs = self.listdir(path_hoje)
+        if(len(logs) == 0): return False
+        logs = sorted(logs)
+        last_log = logs[-1]
+        path_log = self.join(path_hoje, last_log)
+        files = self.listdir(path_log)
+        if(('nota.txt' not in files)|('cookies' not in files)): return False
+        path_nota = self.join(path_log, 'nota.txt')
+        path_cookies = self.join(path_log, 'cookies')
+        file = open(path_nota, 'r')
+        horario_1 = file.readlines()[0]
+        file.close()
+        agora = self.date.datetime.now()
+        horario_2 = self.formata_horario(agora)
+        if(self.delta_horarios(horario_1, horario_2) > tempo_limite): return False
+        cookies = self.pk.load(open(path_cookies, 'rb'))
+        new_cookies = []
+        for cookie in cookies:
+            new_cookie = {}
+            new_cookie['name'] = cookie['name']
+            new_cookie['value'] = cookie['value']
+            new_cookies.append(new_cookie)
+            try:
+                self.driver.add_cookie(new_cookie)
+                print('sucesso')
+            except:
+                print('erro')
+        if(save_info):
+            self.cookies = new_cookies
+            self.horario_inicio_cookies = horario_1
+        self.time.sleep(espera)
+        return True
+
+    # verifica se está dentro do limite de tempo dos cookies
+    def verifica_horario_cookies(self):
+        agora = self.date.datetime.now()
+        horario_atual = self.formata_horario(agora)
+        delta = self.delta_horarios(self.horario_inicio_cookies, horario_atual)
+        if(delta > self.tempo_cookies): return False
+        return True
+
+    #da refresh na pagina (F5)
+    def refresh(self):
+        self.driver.refresh()
+        self.time.sleep(10)
+
+    # abortar padrão
+    def abortar_erro(self):
+        print("ERRO")
+        self.sys.exit(0)
+
+# opera sobre o domínio do Sintegre
+class operador_ONS(navegador):
+    # classe construtora
+    def __init__(self, nome_navegador, user = 'LOGENERGIA', password = 'Energia@4737', tempo_cookies = 3000):
+        navegador.__init__(self, nome_navegador = nome_navegador)
+        self.user = user
+        self.password = password
+        self.sintegre = "https://sintegre.ons.org.br/"
+        self.programacao_operacao = "https://sintegre.ons.org.br/sites/9"
+        self.sintegre_busca = "https://sintegre.ons.org.br/paginas/busca.aspx"
+        self.deck_decomp_ve = "https://sintegre.ons.org.br/sites/9/52//paginas/servicos/historico-de-produtos.aspx?produto=Deck%20e%20Resultados%20DECOMP%20-%20Valor%20Esperado"
+        self.path_dados_sintegre = self.join(self.path_dados_driver, 'sintegre')
+        self.path_deck_decomp = self.join(self.path_dados_sintegre, 'deck_decomp')
+        self.tempo_cookies = tempo_cookies
+
+    # se autentica no domínio do ONS
+    def autenticar(self, guardar_cookies = True):
+        self.driver.get(self.sintegre)
+        self.time.sleep(2)
+        elemento_user = self.driver.find_element_by_id('username')
+        elemento_user.send_keys(self.user)
+        self.time.sleep(1)
+        self.driver.find_element_by_name('submit.IdentificarUsuario').click()
+        self.time.sleep(1)
+        self.driver.find_element_by_xpath("/html/body/div/div[2]/form/input[1]").click()
+        password = self.driver.find_element_by_id('password')
+        password.send_keys(self.password)
+        self.time.sleep(1)
+        self.driver.find_element_by_xpath("/html/body/div/div[2]/form/input[1]").click()
+        self.time.sleep(1)
+        cookies = self.driver.get_cookies()
+        if(guardar_cookies):
+            self.guarda_cookies('sintegre', cookies)
+        self.time.sleep(0.5)
+
+    # verifica se há cookies válidos, c.c fazer autenticação se necessário
+    def verificar_autenticar(self, renovar = False):
+        self.driver.get(self.sintegre)
+        if((self.cookies is not None)&(self.horario_inicio_cookies is not None)): autenticar = (not self.verifica_horario_cookies())
+        else: autenticar = (not self.verifica_cookies('sintegre', self.tempo_cookies))
+        if(renovar): autenticar = True
+        if(autenticar):
+            try:
+                print('------------------')
+                print('   autenticando   ')
+                print('------------------')
+                self.autenticar()
+            except:
+                pass
+
+    # acessa página da programação da operação
+    def acessa_programacao(self, espera_max = 30):
+        self.verificar_autenticar()
+        t1 = self.time.time()
+        self.driver.get(self.programacao_operacao)
+        print('Acessando Programação da Operação')
+        self.time.sleep(1)
+        # espera uma aba ficar visível
+        xpath_aba_1 = '//*[@id="WebPartWPQ1"]/div[1]/div/ul/li[1]/strong/a'
+        print('esperando primeira aba ficar visível... ')
+        aba_1 = self.aguarda_elemento(xpath_aba_1, tentativas = int(espera_max), tempo = 1)
+        if(aba_1 is None):
+            print('Programação da Operação não carregou a tempo...')
+            return None
+        print('Programação da Operação acessada com sucesso!')
+        t2 = self.time.time()
+        print('tempo para carregar: ', t2 - t1)
+
+    # acessa página de carga decomp ou newave
+    def acessa_carga(self, modelo):
+        self.acessa_programacao()
+        index = 1
+        while(True):
+            xpath = '//*[@id="WebPartWPQ1"]/div[1]/div/ul/li[6]/ul/li[' + str(index) + ']/a/strong'
+            elemento = self.checar_xpath(xpath)
+            if(elemento is not None):
+                atributos = self.atributos_elemento(elemento)
+                for atributo in atributos:
+                    desc = atributos[atributo]
+                    if(type(desc) == type('string')):
+                        if(('carga' in desc.lower())&(modelo in desc.lower())):
+                            xpath_1 = '//*[@id="WebPartWPQ1"]/div[1]/div/ul/li[6]/ul/li[' + str(index) + ']/a'
+                            elemento_1 = self.checar_xpath(xpath_1)
+                            if(elemento_1 is not None):
+                                atributos_1 = self.atributos_elemento(elemento_1)
+                                link = atributos_1['href']
+                                self.driver.get(link)
+                                self.time.sleep(5)
+                                return None
+            index += 1
+            if(index > 6): return None
+
+    # procura aba, dado nome-chave para o título
+    def procura_aba(self, nome_chave):
+        def xpath_aba(index):
+            xpath = '//*[@id="WebPartWPQ1"]/div[1]/div/ul/li'.format(index = index)
+            if(index > 0): xpath += '[{index}]'.format(index = index)
+            return xpath + '/strong/a'
+
+        def xpath_sub_aba(index, jindex):
+            xpath = xpath_aba(index)[:-9] + '/ul[2]/li'
+            if(jindex > 0): xpath += '[{jindex}]'.format(jindex = jindex)
+            return xpath + '/strong/a'
+        index = 0
+        while(True):
+            self.time.sleep(1)
+            self.page_home()
+            xpath = xpath_aba(index)
+            elemento = self.scroll_elemento(-1, xpath)
+            if(elemento is None):
+                if(index == 0):
+                    index += 1
+                    continue
+                print('aba não encontrada')
+                return None
+            desc = elemento.text
+            print(desc)
+            if(nome_chave.lower() in desc.lower()): return index
+            else:
+                # procurar sub abas
+                jindex = 0
+                while(True):
+                    self.time.sleep(1)
+                    self.page_home()
+                    xpath = xpath_sub_aba(index, jindex)
+                    sub_aba = self.scroll_elemento(-1, xpath)
+                    if(sub_aba is not None):
+                        if(jindex == 0): print('acessando sub abas')
+                        desc = sub_aba.text
+                        print(desc)
+                        if(nome_chave.lower() in desc.lower()): return index, jindex
+                    elif(jindex > 0): break
+                    jindex += 1
+            index += 1
+
+    # procura produto em aba
+    def procura_produto_aba(self, index_aba, nome_chave):
+        index = 1
+        while(True):
+            self.time.sleep(1)
+            self.page_home()
+            xpath = '//*[@id="WebPartWPQ1"]/div[1]/div/ul/li[' + str(index_aba) + ']/ul[1]/li[' + str(index) + ']/a/strong'
+            elemento = self.scroll_elemento(-1, xpath)
+            if(elemento is None): return None
+            desc = elemento.text
+            print(desc)
+            if(nome_chave.lower() in desc.lower()): return index
+            index += 1
+
+    # acessa produto, dados nomes-chave da aba e do produto
+    def acessa_produto(self, nome_aba, nome_produto):
+        index_aba = self.procura_aba(nome_aba)
+        print(index_aba)
+        if(index_aba is None): self.abortar_erro()
+        index_produto = self.procura_produto_aba(index_aba, nome_produto)
+        print(index_produto)
+        if(index_produto is None): self.abortar_erro()
+        xpath = '//*[@id="WebPartWPQ1"]/div[1]/div/ul/li[' + str(index_aba) + ']/ul[1]/li[' + str(index_produto) + ']/a'
+        produto = self.aguarda_elemento(xpath)
+        atributos = self.atributos_elemento(produto)
+        link = atributos['href']
+        print(link)
+        self.driver.get(link)
+        self.time.sleep(5)
+
+    # clica em data na janela de busca do sintegre
+    def escolhe_data_janela(self, dia):
+        print(dia)
+        linha = 1
+        while(True):
+            coluna = 1
+            while(True):
+                xpath = '//*[@id="ui-datepicker-div"]/table/tbody/tr[' + str(linha) + ']/td[' + str(coluna) + ']'
+                elemento = self.checar_xpath(xpath)
+                if(elemento is None):
+                    if(coluna == 1): return None
+                    break
+                atributos = self.atributos_elemento(elemento)
+                if('data-event' in atributos):
+                    xpath_dia = xpath + '/a'
+                    dia_elemento = self.checar_xpath(xpath_dia).text
+                    if(int(dia) == int(dia_elemento)):
+                        elemento.click()
+                        return True
+                coluna += 1
+            linha += 1
+
+    # insere datas utilizando o pop-up
+    def insere_datas(self, data_1, data_2, busca = False):
+        if(not busca):
+            xpath_input_data_1 = '/html/body/form/div[12]/div/div[3]/div/div/div[2]/div[2]/div/div/div/div[2]/div[1]/div/div/div/div[2]/fieldset/div[2]/div/div[1]/input'
+            xpath_input_data_2 = '/html/body/form/div[12]/div/div[3]/div/div/div[2]/div[2]/div/div/div/div[2]/div[1]/div/div/div/div[2]/fieldset/div[2]/div/div[2]/input'
+            xpath_barra_periodo = '//*[@id="periodo"]'
+            barra_periodo = self.aguarda_elemento(xpath_barra_periodo)
+            if(barra_periodo is None): return None
+            barra_periodo.click()
+            self.time.sleep(0.2)
+            # procurar opção para especificar data
+            index = 1
+            #self.driver.save_screenshot('figura_ons.png')
+            #print('--------------------')
+            #print('        EXIT        ')
+            #print('--------------------')
+            #self.sys.exit(0)
+            while(True):
+                xpath_opcao = '//*[@id="periodo"]/option[' + str(index) + ']'
+                opcao = self.aguarda_elemento(xpath_opcao)
+                if(opcao is None): return None
+                print(opcao.text)
+                if('especificar' in opcao.text.lower()):
+                    opcao.click()
+                    self.time.sleep(3)
+                    break
+                index += 1
+        else:
+            xpath_input_data_1 = '/html/body/form/div[12]/div/div[3]/div/div/div/div[1]/div[2]/div/div[2]/div[2]/div[1]/div/input'
+            xpath_input_data_2 = '/html/body/form/div[12]/div/div[3]/div/div/div/div[1]/div[2]/div/div[2]/div[2]/div[2]/div/input'
+        print('----------------------------------')
+        print('--------colocando datas-----------')
+        print('----------------------------------')
+        if('chrome' not in self.nome_navegador): self.time.sleep(5)
+        input_data_1 = self.aguarda_elemento(xpath_input_data_1, tentativas = 10)
+        if(input_data_1 is None): return None
+        input_data_2 = self.aguarda_elemento(xpath_input_data_2, tentativas = 10)
+        if(input_data_2 is None): return None
+        print(data_1)
+        self.escreve_input(input_data_1, data_1)
+        self.time.sleep(0.5)
+        self.escolhe_data_janela(data_1[:2])
+        self.time.sleep(2)
+        print(data_2)
+        self.escreve_input(input_data_2, data_2)
+        self.time.sleep(0.5)
+        self.escolhe_data_janela(data_2[:2])
+        self.time.sleep(3)
+        return True
+
+    # procura elemento na página e retorna link se encontrar
+    def procura_deck_decomp_pagina(self, ini_rev):
+        print(ini_rev)
+        ano_rev = ini_rev.year
+        mes_rev = ini_rev.month
+        dia_rev = ini_rev.day
+        index = 1
+        while(True):
+            #//*[@id="produtos"]/div[2]/div[2]/div[1]/div/div[1]/span[1]
+            #//*[@id="produtos"]/div[3]/div[2]/div[1]/span[1]
+            xpath_dia_elemento = '//*[@id="produtos"]/div[' + str(index) + ']/div[2]/div[1]/span[1]'
+            xpath_mes_elemento  = '//*[@id="produtos"]/div[' + str(index) + ']/div[2]/div[1]/span[2]'
+            xpath_ano_elemento = '//*[@id="produtos"]/div[' + str(index) + ']/div[2]/div[1]/span[3]'
+            dia_elemento = self.aguarda_elemento(xpath_dia_elemento)
+            if(dia_elemento is None):
+                xpath_dia_elemento = '//*[@id="produtos"]/div[' + str(index) + ']/div[2]/div[1]/span[1]'
+                xpath_mes_elemento  = '//*[@id="produtos"]/div[' + str(index) + ']/div[2]/div[1]/span[2]'
+                xpath_ano_elemento = '//*[@id="produtos"]/div[' + str(index) + ']/div[2]/div[1]/span[3]'
+            dia_elemento = self.aguarda_elemento(xpath_dia_elemento)
+            mes_elemento = self.aguarda_elemento(xpath_mes_elemento)
+            ano_elemento = self.aguarda_elemento(xpath_ano_elemento)
+            if((dia_elemento is None)|(mes_elemento is None)|(ano_elemento is None)): return None
+            desc_dias, desc_mes, desc_ano = dia_elemento.text, mes_elemento.text, ano_elemento.text
+            print(desc_dias, desc_mes, desc_ano)
+            dia_0 = int(desc_dias.split()[0])
+            mes_0 = self.meses_dict[desc_mes.split()[0].upper()]
+            ano_0 = int(desc_ano.split()[0])
+            if((dia_0 == dia_rev)&(mes_0 == mes_rev)&(ano_0 == ano_rev)):
+                print('encontrado')
+                xpath_elemento = '/html/body/form/div[12]/div/div[3]/div/div/div[2]/div[2]/div/div/div/div[2]/div[1]/div/div/div/div[2]/div/div[' + str(index) + ']/div[2]/div[2]/a'
+                elemento = self.aguarda_elemento(xpath_elemento, tentativas = 5)
+                if(elemento is None): return None
+                atributos = self.atributos_elemento(elemento)
+                link = self.deck_decomp_ve + '/' + atributos['href']
+                return link
+            index += 1
+
+    # baixa deck decomp procurando pelo Ano-Mês e rev
+    def baixa_deck_decomp(self, ano, mes, rev, path_folder, nome_arquivo, entrar_pagina = True):
+        self.verificar_autenticar()
+        # data de início da rev
+        # pesquisar por datas entre d-10 e d+10 dias da data de início da rev
+        ini_rev = self.local.ini_ano_mes_rev(ano, mes, rev)
+        data_1 = ini_rev - self.date.timedelta(days = 10)
+        data_1 = self.formata_data(data_1)
+        data_2 = ini_rev + self.date.timedelta(days = 10)
+        data_2 = self.formata_data(data_2)
+        print(ini_rev)
+        print(data_1, data_2)
+        # acessando página
+        #nome_aba = 'Programação mensal da operação energética'
+        #nome_produto = 'Deck e Resultados DECOMP - Valor Esperado'
+        #self.acessa_programacao()
+        #print('Programação acessada')
+        #self.acessa_produto(nome_aba, nome_produto)
+        if(entrar_pagina): self.driver.get(self.deck_decomp_ve)
+        self.time.sleep(5)
+        link = self.procura_deck_decomp_pagina(ini_rev)
+        if(link is None):
+            ret = self.insere_datas(data_1, data_2)
+            if(ret is None): return None
+            link = self.procura_deck_decomp_pagina(ini_rev)
+            if(link is None):
+                self.driver.save_screenshot(self.join(self.path_deck_decomp, 'f.png'))
+                return None
+        self.baixa_link(link, path_folder, nome_arquivo)
+
+    # baixa decks num certo intervalo de tempo
+    def baixa_decks_decomp_periodo(self, data_rev_ini, data_rev_fim, max_tentativas = 3):
+        self.verificar_autenticar()
+        self.driver.get(self.deck_decomp_ve)
+        data = self.local.rev_fim(data_rev_ini)
+        data_fim = self.local.rev_fim(data_rev_fim)
+        while(data < data_fim):
+            ano, mes = data.year, data.month
+            rev = self.local.numero_rev(data)
+            contador = 0
+            nome = "{ano}_{mes}_{rev}".format(ano = ano, mes = mes, rev = rev)
+            while(contador < max_tentativas):
+                try:
+                    self.baixa_deck_decomp(ano, mes, rev, self.path_deck_decomp, nome)
+                    baixou = True
+                except:
+                    baixou = False
+                if(baixou): break
+                contador += 1
+            data += self.date.timedelta(days = 7)
+
+    # verifica se última carga do decomp/modelo foi ou não baixada, se são, baixa a mesma
+    def baixa_ultima_carga(self, modelo):
+        self.verificar_autenticar()
+        xpath = '//*[@id="produtos"]/div[1]/div[2]/div[2]/small'
+        elemento = self.checar_xpath(xpath)
+        if(elemento is not None):
+            fatiado = elemento.text.split()
+            data = fatiado[1]
+            data = data[-4:] + data[3:5] + data[:2]
+            path_carga_modelo = self.join(self.path_dados_sintegre, 'carga_' + modelo)
+            baixados = self.listdir(path_carga_modelo)
+            if(data not in baixados):
+                xpath = '/html/body/form/div[12]/div/div[3]/div/div/div[2]/div[2]/div/div/div/div[2]/div[1]/div/div/div/div[2]/div/div[1]/div[2]/div[2]/a'
+                elemento = self.checar_xpath(xpath)
+                if(elemento is not None):
+                    atributos = self.atributos_elemento(elemento)
+                    link = self.sintegre + atributos['href']
+                    path_folder = self.join(path_carga_modelo, data)
+                    nome_arquivo = elemento.text
+                    self.os.mkdir(path_folder)
+                    self.baixa_link(link, path_folder, nome_arquivo)
+
+    # realiza busca no sintegre
+    # se as datas forem informadas, devem estar no formato 'yyyymmdd' ou no formato 'date'
+    # se alguma das datas forem "None", apenas realizar a pesquisa
+    def busca_dados(self, termo_busca, data_inicial, data_final):
+        self.verificar_autenticar(renovar = True)
+        print("acessando site de busca")
+        self.time.sleep(3)
+        self.driver.get(self.sintegre_busca)
+        self.time.sleep(5)
+        if((data_inicial is not None)&(data_final is not None)):
+            data_inicial = self.formata_data(data_inicial)
+            data_final = self.formata_data(data_final)
+            ret = self.insere_datas(data_inicial, data_final, busca = True)
+            print('datas inseridas com sucesso')
+            if(ret is None): return None
+        xpath_barra_busca = '//*[@id="tbSearch"]'
+        elemento_barra_busca = self.aguarda_elemento(xpath_barra_busca)
+        if(elemento_barra_busca is None): return None
+        self.escreve_input(elemento_barra_busca, termo_busca, enter = True)
+        if('chrome' not in self.nome_navegador): self.time.sleep(5)
+        xpath_botao_busca = '//*[@id="btnSearch"]'
+        botao_busca = self.checar_xpath(xpath_botao_busca)
+        self.refresh()
+        if((data_inicial is not None)&(data_final is not None)):
+            #data_inicial = self.formata_data(data_inicial)
+            #data_final = self.formata_data(data_final)
+            ret = self.insere_datas(data_inicial, data_final, busca = True)
+            print('datas inseridas com sucesso')
+            if(ret is None): return None
+        xpath_barra_busca = '//*[@id="tbSearch"]'
+        elemento_barra_busca = self.aguarda_elemento(xpath_barra_busca)
+        if(elemento_barra_busca is None): return None
+        self.escreve_input(elemento_barra_busca, termo_busca, enter = True)
+        if('chrome' not in self.nome_navegador): self.time.sleep(5)
+        xpath_botao_busca = '//*[@id="btnSearch"]'
+        botao_busca = self.checar_xpath(xpath_botao_busca)
+        if(botao_busca is None): return None
+        botao_busca.click()
+        self.time.sleep(5)
+
+    # procura documento padrão
+    def procura_documento(self, palavra_chave, nome, pasta):
+        path_DGL = self.join(self.path_dados_sintegre, 'docs', palavra_chave)
+        try:
+            pastas = self.listdir(path_DGL)
+        except:
+            return False
+        if(pasta not in pastas): return False
+        path_pasta = self.join(path_DGL, pasta)
+        docs = self.listdir(path_pasta)
+        if(nome in docs): return True
+        return False
+
+    # arquiva documento
+    def arquiva_documento_padrao(self, link, palavra_chave, nome, pasta):
+        path_docs = self.join(self.path_dados_sintegre, 'docs')
+        path_word = self.join(path_docs, palavra_chave)
+        docs = self.listdir(path_docs)
+        if(palavra_chave not in docs): self.os.mkdir(path_word)
+        pastas = self.listdir(path_word)
+        path_pasta = self.join(path_word, pasta)
+        if(pasta not in pastas): self.os.mkdir(path_pasta)
+        self.baixa_link(link, path_pasta, nome)
+
+    # procura documento novo, baseado em datas de até 30 dias arquivadas
+    def arquiva_documento_novo(self, palavra_chave, data_ref, baixar = True, retornar_lista = True):
+        data_ref = self.date.date(int(data_ref[:4]), int(data_ref[4:6]), int(data_ref[6:]))
+        data2 = data_ref
+        data1 = data_ref - self.date.timedelta(days = 30)
+        self.driver.delete_all_cookies()
+        self.busca_dados(palavra_chave, data1, data2)
+        if('chrome' not in self.nome_navegador): self.time.sleep(10)
+        self.driver.save_screenshot('f0.png')
+        #'''
+        index = 1
+        altura_0 = self.page_height()
+        new_docs = []
+        while(True):
+            xpath_nome = '//*[@id="search-results"]/li[' + str(index) + ']/div[3]/div[1]/span[2]/strong'
+            xpath_data = '//*[@id="search-results"]/li[' + str(index) + ']/div[3]/div[1]/span[3]/strong'
+            nome = self.aguarda_elemento(xpath_nome)
+            data = self.aguarda_elemento(xpath_data)
+            while(nome is None):
+                self.page_down()
+                print('scroll down')
+                print('altura: ', altura_0)
+                altura_1 = self.page_height()
+                if(altura_1 == altura_0):
+                    return new_docs
+                altura_0 = altura_1
+                nome = self.aguarda_elemento(xpath_nome)
+                data = self.aguarda_elemento(xpath_data)
+            print('Index: ', index)
+            print('Nome: ', nome.text)
+            print('Data: ', data.text)
+            if(palavra_chave in nome.text.split()):
+                data = data.text
+                if(len(data) > 4): pasta = data[-4:] + data[3:5]
+                else: pasta = data
+                print(pasta)
+                ja_baixado = self.procura_documento(palavra_chave, nome.text, pasta)
+                if(not ja_baixado):
+                    new_docs.append(nome.text)
+                    xpath_link = '/html/body/form/div[12]/div/div[3]/div/div/div/div[1]/div[2]/div/div[4]/ul/li[' + str(index) + ']/div[3]/div[2]/a'
+                    elemento_link = self.aguarda_elemento(xpath_link)
+                    atributos = self.atributos_elemento(elemento_link)
+                    link = atributos['href']
+                    self.arquiva_documento_padrao(link, palavra_chave, nome.text, pasta)
+            index += 1
+        self.driver.save_screenshot('ons.png')
+        return new_docs
+
+    # procura documentos num range de tempo
+    def arquiva_documentos_novos(self, palavra_chave, data_ini, data_fim, baixar = True, retornar_lista = True):
+        data_ini = self.date.date(int(data_ini[:4]), int(data_ini[4:6]), int(data_ini[6:]))
+        data_fim = self.date.date(int(data_fim[:4]), int(data_fim[4:6]), int(data_fim[6:]))
+        data = data_fim
+        docs = []
+        docs += self.arquiva_documento_novo(palavra_chave, data.strftime("%Y%m%d"), baixar = baixar, retornar_lista = retornar_lista)
+        while((data - data_ini).days > 30):
+            data = data - self.date.timedelta(days = 30)
+            docs += self.arquiva_documento_novo(palavra_chave, data.strftime("%Y%m%d"), baixar = baixar, retornar_lista = retornar_lista)
+        return docs
+
+# opera sobre o domínio da CCEE
+class operador_CCEE(navegador):
+    def __init__(self, nome_navegador):
+        navegador.__init__(self, nome_navegador = nome_navegador)
+        # urls
+        self.ccee = "https://www.ccee.org.br/"
+        self.acervo = "https://www.ccee.org.br/web/guest/acervo-ccee"
+        self.mercado = "https://www.ccee.org.br/web/guest/dados-e-analises/dados-mercado-mensal"
+        self.cookies_ccee = None
+
+    # acessa página do acervo-ccee
+    def acessar_acervo(self):
+        self.driver.get(self.acervo)
+        self.time.sleep(2)
+        xpath_msg = '//*[@id="fragment-6002-onqx"]/div/div/div/div/button'
+        msg = self.aguarda_elemento(xpath_msg)
+        if(msg is None): return None
+        msg.click()
+        self.time.sleep(2)
+
+    # acessa página de dados-mercado-mensal
+    def acessa_mercado_mensal(self):
+        self.driver.get(self.mercado)
+        self.time.sleep(2)
+        self.page_down()
+
+    # identifica nome do arquivo pelo link
+    def nome_arq_link(self, link):
+        nomes = link.split("/")
+        return nomes[-2]
+
+    # altera tipo de busca em acervo-ccee
+    def altera_busca_acervo(self, tipo_busca, data1, data2):
+        # se tipo_busca for '', entender que é para utilizar datas personalizadas
+        # se for '60' por exemplo, buscar horizonte dos últimos 60 dias
+        if(tipo_busca == ''):
+            tipo_busca = 'dropdown-item'
+            data1 = self.formata_data(data1)
+            data2 = self.formata_data(data2)
+        else:
+            tipo_busca = 'dropdown-item' + ' ' + tipo_busca
+            data1 = None
+            data2 = None
+        xpath_barra_rolagem = '//*[@id="portlet_org_ccee_acervo_portlet_CCEEAcervoPortlet_INSTANCE_tixm"]/div/div[2]/div/div[1]/div[1]/div[1]/div/button[2]'
+        # abrindo barra de rolagem para selecionar data personalizada
+        barra_rolagem = self.driver.find_element_by_xpath(xpath_barra_rolagem)
+        if(barra_rolagem is None): return None
+        barra_rolagem.click()
+        self.time.sleep(2)
+        # retorna xpath do elemento "(index + 1)"-ésimo
+        def xpath_rolagem(index):
+            return '//*[@id="portlet_org_ccee_acervo_portlet_CCEEAcervoPortlet_INSTANCE_tixm"]/div/div[2]/div/div[1]/div[1]/div[1]/div/ul/li[{n}]/span'.format(n = index + 1)
+        index = 0
+        while(True):
+            xpath_elemento = xpath_rolagem(index)
+            elemento = self.aguarda_elemento(xpath_elemento)
+            if(elemento is None): break
+            else:
+                atributos = self.atributos_elemento(elemento)
+                print(atributos)
+                if(atributos['class'] == tipo_busca):
+                    elemento.click()
+                    self.time.sleep(1)
+                    break
+            self.time.sleep(0.5)
+            index += 1
+        if(data1 is not None):
+            # selecionando datas
+            xpath_data1 = '//*[@id="initialDateAcervo"]'
+            xpath_data2 = '//*[@id="finalDateAcervo"]'
+            elemento_data1 = self.driver.find_element_by_xpath(xpath_data1)
+            elemento_data2 = self.driver.find_element_by_xpath(xpath_data2)
+            if((elemento_data1 is None)|(elemento_data2 is None)): return None
+            # data inicial
+            self.escreve_input(elemento_data1, data1)
+            self.time.sleep(0.5)
+            # data final
+            self.escreve_input(elemento_data2, data2)
+            self.time.sleep(0.5)
+            # filtrar
+            xpath_filtrar = '//*[@id="filtrar"]'
+            elemento_filtrar = self.driver.find_element_by_xpath(xpath_filtrar)
+            if(elemento_filtrar is None): return None
+            elemento_filtrar.click()
+            self.time.sleep(1)
+
+    # busca com input de "string" em acervo-ccee
+    def busca_acervo_ccee(self, nome_busca):
+        xpath_input_busca = '//*[@id="keyword"]'
+        input_busca = self.driver.find_element_by_xpath(xpath_input_busca)
+        if(input_busca is None):
+            print("ERRO na busca")
+            return None
+        self.escreve_input(input_busca, nome_busca, enter = True)
+        self.time.sleep(3)
+
+    # xpath de característica de um documento em 'acervo-ccee'
+    def xpath_documento_acervo_resultado(self, tipo, index):
+        if(tipo == 'title'):
+            return '//*[@id="resultsHTML"]/div[' + str(index + 1) + ']/div/div[2]/div'
+            #return '//*[@id="resultsHTML"]/div[' + str(index + 1) + ']/div/div[2]/div/a'
+        elif(tipo == 'subtitle'):
+            return '//*[@id="resultsHTML"]/div[' + str(index + 1) + ']/div/div[2]/div/h6'
+        elif(tipo == 'publicacao'):
+            return '//*[@id="resultsHTML"]/div[' + str(index + 1) + ']/div/div[2]/div/small'
+        elif(tipo == 'referencia'):
+            return '//*[@id="resultsHTML"]/div[' + str(index + 1) + ']/div/div[1]/small'
+        return None
+
+    # próxima página em acervo-ccee
+    def proxima_pagina(self):
+        print('--------------')
+        print('próxima página')
+        print('--------------')
+        def xpath_paginacao(index):
+            return '//*[@id="portlet_org_ccee_acervo_portlet_CCEEAcervoPortlet_INSTANCE_tixm"]/div/div[2]/div/div[1]/div[2]/div[2]/div[3]/nav/ul/li[' + str(index + 1) + ']'
+        self.page_end()
+        page_atual = None
+        index = 0
+        # primeiro identificar a página atual
+        while True:
+            elemento = self.aguarda_elemento(xpath_paginacao(index))
+            if(elemento is None): break
+            atributos = self.atributos_elemento(elemento)
+            if(page_atual is not None):
+                att = atributos['class']
+                # se não tiver próxima página, retornar None
+                if('position' not in att):
+                    print('última página')
+                    return None
+                elemento.click()
+                self.time.sleep(1)
+                return True
+            if('active' in atributos['class']):
+                page_atual = atributos['class'][9:11]
+            index += 1
+
+    # próxima página em acervo-ccee
+    def anterior_pagina(self):
+        print('---------------')
+        print('página anterior')
+        print('---------------')
+        def xpath_paginacao(index):
+            return '//*[@id="portlet_org_ccee_acervo_portlet_CCEEAcervoPortlet_INSTANCE_tixm"]/div/div[2]/div/div[1]/div[2]/div[2]/div[3]/nav/ul/li[' + str(index + 1) + ']'
+        self.page_end()
+        self.time.sleep(0.5)
+        page_atual = None
+        index = 0
+        incremento_index = 1
+        # primeiro identificar a página atual
+        while True:
+            elemento = self.aguarda_elemento(xpath_paginacao(index))
+            if(elemento is None): break
+            atributos = self.atributos_elemento(elemento)
+            if(page_atual is not None):
+                print(atributos['class'])
+                elemento.click()
+                self.time.sleep(1)
+                break
+            if('active' in atributos['class']):
+                page_atual = atributos['class'][9:11]
+                # uma vez encontrada a página atual, decrementar index para acessar página anterior
+                incremento_index = - 1
+            index += incremento_index
+
+    # procura documento nos resultados de pesquisa
+    def procura_documento_busca(self, titulo, subtitulo = None, publicacao = None, referencia = None, exato = False):
+        def comparar_string(procurado, encontrado, exato):
+            if(not exato):
+                if(procurado.lower() in encontrado.lower()): return True
+                return False
+            else:
+                if(procurado == encontrado): return True
+                return False
+        def checar_documento(index_documento):
+            xpath_titulo = self.xpath_documento_acervo_resultado('title', index_documento)
+            titulo_documento = self.driver.find_element_by_xpath(xpath_titulo).text
+            titulo_documento = titulo_documento.split('\n')
+            print(titulo_documento[0])
+            if(not comparar_string(titulo, titulo_documento[0], exato)): return False
+            if(subtitulo is not None):
+                if(not comparar_string(subtitulo, titulo_documento[1], exato)): return False
+            if(publicacao is not None):
+                if(not comparar_string(publicacao, titulo_documento[-1], exato)): return False
+            if(referencia is not None):
+                self.page_up()
+                xpath_referencia = self.xpath_documento_acervo_resultado('referencia', index_documento)
+                referencia_documento = self.driver.find_element_by_xpath(xpath_referencia).text
+                print(referencia_documento)
+                #referencia_documento = self.atributos_elemento(referencia_documento)['refer']
+                if(not comparar_string(referencia, referencia_documento, exato)): return False
+            return True
+        pagina = 0
+        index_documento = 0
+        documentos_por_pagina = 10
+        while True:
+            #self.driver.save_screenshot('IMG_{p}_{i}.png'.format(p = pagina, i = index_documento))
+            print("Página: ", pagina + 1)
+            print("Documento: ", index_documento + 1)
+            documento = self.aguarda_elemento(self.xpath_documento_acervo_resultado('title', index_documento))
+            # checar se elemento é o procurado
+            if(documento is not None):
+                documento_encontrado = checar_documento(index_documento)
+                if(documento_encontrado):
+                    print("Documento encontrado")
+                    print("Documento nº: ", index_documento + 1)
+                    print("Página nº: ", pagina + 1)
+                    return pagina, index_documento
+            # se não estiver acessível, scrow down até encontrar
+            else:
+                altura_atual = self.page_height()
+                self.page_down()
+                while(altura_atual != self.page_height()):
+                    documento = self.aguarda_elemento(self.xpath_documento_acervo_resultado('title', index_documento))
+                    # checar se elemento é o procurado
+                    if(documento is not None):
+                        documento_encontrado = checar_documento(index_documento)
+                        if(documento_encontrado):
+                            print("Documento encontrado")
+                            print("Documento nº: ", index_documento + 1)
+                            print("Página nº: ", pagina + 1)
+                            return pagina, index_documento
+                    altura_atual = self.page_height()
+                    self.page_down()
+                # se chegou ao fim da página e não encontrou elemento acessível, não existem mais elementos
+                if(documento is None): return None
+            index_documento += 1
+            if(index_documento == documentos_por_pagina):
+                proxima = self.proxima_pagina()
+                if(proxima is None): return None
+                pagina += 1
+                index_documento = 0
+
+    # baixa arquivo de um dos documentos listados pela pesquisa realizada
+    def baixa_documento_acervo(self, index_documento, path_download, retornar_nome_arquivo = True):
+        xpath_download = '//*[@id="resultsHTML"]/div[' + str(index_documento + 1) + ']/div/div[2]/div/a'
+        elemento_download = self.aguarda_elemento(xpath_download)
+        if(elemento_download is not None):
+            self.page_down()
+            elemento_download = self.aguarda_elemento(xpath_download)
+            if(elemento_download is None): return None
+        link_download = self.atributos_elemento(elemento_download)['href']
+        nome_arquivo = self.nome_arq_link(link_download)
+        self.baixa_link(link_download, path_download, nome_arquivo)
+        if(retornar_nome_arquivo): return nome_arquivo
+
+    # procura e baixa documento na pesquisa no acervo-ccee caso encontre o arquivo
+    # (assumi que a busca já foi realizada no acervo-ccee)
+    def procura_baixa_documento(self, path_download, titulo, subtitulo = None, publicacao = None, referencia = None, exato = False, retornar_nome_arquivo = True, data1 = None, data2 = None):
+        self.acessar_acervo()
+        if(data1 is not None):
+            tipo_busca = ''
+            self.altera_busca_acervo(tipo_busca, data1, data2)
+        self.busca_acervo_ccee(titulo)
+        retorno = self.procura_documento_busca(titulo, subtitulo = subtitulo, publicacao = publicacao, referencia = referencia, exato = exato)
+        if(retorno is None): return None
+        pagina, index_documento = retorno[0], retorno[1]
+        nome_arquivo = self.baixa_documento_acervo(index_documento, path_download, retornar_nome_arquivo = True)
+        if(retornar_nome_arquivo):
+            return nome_arquivo
+
+    # insere na aba "Ano" em "mercado-mensal"
+    def insere_ano_mercado(self, ano):
+        xpath_busca_ano = '//*[@id="selectYear"]'
+        busca_ano = self.driver.find_element_by_xpath(xpath_busca_ano)
+        self.escreve_input(busca_ano, ano, enter = True)
+        self.time.sleep(1)
+
+    # baixa planilha de InfoMercado
+    def baixa_info_mercado(self, tipo, path_download, retornar_nome_arquivo = True):
+        def xpath_documento(index):
+            return '//*[@id="portlet_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_osst"]/div/div[2]/div/div[2]/div[' + str(index + 1) + ']/div[1]/span[1]'
+        def xpath_download(index):
+            return '//*[@id="portlet_com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet_INSTANCE_osst"]/div/div[2]/div/div[2]/div[' + str(index + 1) + ']/div[2]/a'
+        index = 0
+        while True:
+            documento = self.checar_xpath(xpath_documento(index))
+            if(documento is None): break
+            else:
+                # se palavra 'gerais' ou 'individuais' está no texto, baixar arquivo
+                if(tipo.lower() in documento.text.lower()):
+                    elemento_download = self.checar_xpath(xpath_download(index))
+                    if(elemento_download is None): return None
+                    link_download = self.atributos_elemento(elemento_download)['href']
+                    nome_arquivo = self.nome_arq_link(link_download)
+                    self.baixa_link(link_download, path_download, nome_arquivo)
+                    if(retornar_nome_arquivo):
+                        return nome_arquivo
+                    break
+            index += 1
+        return None
+
+class operador_StormVista(navegador):
+    def __init__(self, nome_navegador):
+        from selenium import webdriver
+        from selenium.webdriver.common.keys import Keys
+        import datetime
+        import urllib.request
+        self.mapas2 = ['120', '240', '360']
+        self.modelos2= ['gfs-suite', 'gfs-ens-suite', 'ecmwf-suite', 'ecmwf-eps-suite', 'cmc-ens-suite']
+        self.horario2 = ['00z']
+        navegador.__init__(self, nome_navegador=nome_navegador)
+        #self.driver = navegador.driver()
+        self.idtime = '0'
+        self.data = datetime.datetime.today().strftime("%Y%m%d")
+        self.dictmodeloespecifico = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
+                                     'gfs-ens-suite': {'120': '0', '240': '20', '360': '40'},
+                                     'ecmwf-suite': {'120': '0', '240': '24'},
+                                     'ecmwf-eps-suite': {'120': '0', '240': '24', '360': '44'},
+                                     'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
+        self.driver = self.login_site()
+
+    def login_site(self):  # função responsável por fazer login no site
+        ##logando no site
+        f = open(
+            r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\phantom_js\mapas_stormvista/login_stormvista.txt')
+        user, password = f.readline().split(';')
+        self.driver.get('https://www.stormvistawxmodels.com/')
+        login = self.driver.find_element(self.By.ID, 'edit-name')
+        login.click()
+        self.sleep(4)
+        login.send_keys(user)
+        self.sleep(4)
+        login = self.driver.find_element(self.By.ID, 'edit-pass')
+        login.click()
+        self.sleep(4)
+        login.send_keys(password)
+        login = self.driver.find_element(self.By.ID, 'edit-submit')
+        login.click()
+        self.sleep(4)
+        return self.driver
+
+    def mapaesp(self, modelos, horario,
+                mapas):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+        for mapa in mapas:
+            for modelo in modelos:
+                for hora in horario:
+                    mapas1 = self.dictmodeloespecifico[modelo]
+                    self.idtime = mapas1[mapa]
+                    for c in range(0, 15):
+                        self.driver.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
+                        idimage = '17'
+                        self.sleep(4)
+                        img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
+                        img1.click()
+                        self.sleep(4)
+                        um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
+                        x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
+                        self.sleep(4)
+                        Image1 = self.driver.get_screenshot_as_file(x)
+                        Img = self.Image.open(x)
+                        croppedIm = Img.crop((60, 55, 900, 700))
+                        root_directory = (
+                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
+                        if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
+                            self.os.mkdir(f'{root_directory}\{self.data}')
+                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
+                        elif self.os.path.isdir(f'{root_directory}\{self.data}') is True:
+                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
+                            print("Imagem salva. Pasta já estava criada")
+                    else:
+                        pass
+
+
+    def rodadazero(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+        for mapa in self.mapas2:
+            for modelo in self.modelos2:
+                for hora in self.horario2:
+                    mapas1 = self.dictmodeloespecifico[modelo]
+                    self.idtime = mapas1[mapa]
+                    try:
+                        self.driver.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
+                        idimage = '17'
+                        self.sleep(4)
+                        img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
+                        img1.click()
+                        self.sleep(4)
+                        um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
+                        x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
+                        Image1 = self.driver.get_screenshot_as_file(x)
+                        Img = self.Image.open(x)
+                        croppedIm = Img.crop((60, 55, 900, 700))
+                        root_directory = (
+                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
+                        if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
+                            self.os.mkdir(f'{root_directory}\{self.data}')
+                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
+                            pass
+                        elif self.os.path.isdir(f'{root_directory}\{self.data}') is True:
+                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
+                            print("Imagem salva. Pasta já estava criada")
+                            pass
+                    except:
+                        pass
+
+
+    def cfsweekly(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+        for c in range(1, 5):
+            if c<=5:
+                self.driver.get('https://www.stormvistawxmodels.com/')
+                self.sleep(3)
+                self.driver.get('https://www.stormvistawxmodels.com/sv/cfs-weekly')
+                img = self.driver.find_element(self.By.XPATH, f'/html/body/div[2]/div/div/table[6]/tbody/tr[{c}]/td[5]/a/img[1]')
+                url = img.get_attribute('src')
+                root_directory = (fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\cfs-weekly')
+                if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
+                    self.os.mkdir(f'{root_directory}\{self.data}')
+                    self.request.urlretrieve(url, fr'{root_directory}\{self.data}\{self.data}_cfs_weekly_semana_{c}.png')
+                elif self.os.path.isdir(f'{root_directory}\{self.data}') is True:
+                    self.request.urlretrieve(url, fr'{root_directory}\{self.data}\{self.data}_cfs_weekly_semana_{c}.png')
+                    print("Imagem salva. Pasta já estava criada")
+            else:
+                pass
+
+
+
