@@ -1206,24 +1206,21 @@ class operador_StormVista(navegador):
 
     def cfsweekly(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
         for c in range(1, 5):
-            try:
+                        if c<=5:
                 self.driver.get('https://www.stormvistawxmodels.com/')
                 self.sleep(3)
-                self.driver.get(f'https://images.stormvistawxmodels.com/140c0b26bb78a0467b7ac53ea61c4632/cfs-weekly/{self.data}/00z/CFS-WEEKLY_QPF_na_monsun-{c}_f{c}.png?v=rksfjd')
+                self.driver.get(f'https://images.stormvistawxmodels.com/66a4e0aa3fcfd8315b2f0c3e2320ee93/cfs-weekly/{self.data}/00z/CFS-WEEKLY_QPF_na_monsun-{c}_f{c}.png?v=rksfjd')
                 self.driver.maximize_window()
                 x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
                 Image1 = self.driver.get_screenshot_as_file(x)
                 Img = self.Image.open(x)
                 croppedIm = Img.crop((200, 50, 1150, 700))
                 root_directory = (fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\cfs-weekly')
-                try:
+                if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
                     self.os.mkdir(f'{root_directory}\{self.data}')
                     croppedIm.save(f'{root_directory}\{self.data}\{self.data}_cfs_weekly_semana_{c}.png')
-                except Exception as erro:
+                elif self.os.path.isdir(f'{root_directory}\{self.data}') is True:
                     croppedIm.save(f'{root_directory}\{self.data}\{self.data}_cfs_weekly_semana_{c}.png')
-                    print(erro)
-            except Exception as erro:
-                print(erro)
-                print(f"AINDA NÃO SAIU ESSE MAPA AQUI")
+                    print("Imagem salva. Pasta já estava criada")
+            else:
                 pass
-
