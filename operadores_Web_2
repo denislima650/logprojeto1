@@ -14,7 +14,7 @@ class navegador():
         from operadores_locais import operador_local
         self.local = operador_local()
         from time import sleep
-        self.sleep = sleep
+        self.tempo = sleep(5)
         import selenium
         self.selenium = selenium
         from selenium.common.exceptions import NoSuchElementException
@@ -1183,8 +1183,8 @@ class operador_StormVista(navegador):
         for c in range(1, 5):
             if c<=5:
                 self.driver.get('https://www.stormvistawxmodels.com/')
-                self.sleep(3)
-                self.driver.get('https://www.stormvistawxmodels.com/sv/cfs-weekly')
+                self.tempo()
+                self.driver.get(f'https://www.stormvistawxmodels.com/sv/cfs-weekly/sa/{self.data}')
                 img = self.driver.find_element(self.By.XPATH, f'/html/body/div[2]/div/div/table[6]/tbody/tr[{c}]/td[5]/a/img[1]')
                 url = img.get_attribute('src')
                 root_directory = (fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\cfs-weekly')
