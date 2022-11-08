@@ -1115,9 +1115,9 @@ class operador_StormVista(navegador):
         self.data = datetime.datetime.today().strftime("%Y%m%d")
         self.dictmodeloespecifico = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
                                      'gfs-ens-suite': {'120': '0', '240': '20', '360': '40'},
-                                     'ecmwf-suite': {'120': '0', '240': '24'},
                                      'ecmwf-eps-suite': {'120': '0', '240': '24', '360': '44'},
-                                     'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'}}
+                                     'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'},
+                                     'ecmwf-suite': {'120': '0', '240': '24'}}
         self.driver = self.login_site()
 
     def login_site(self):  # função responsável por fazer login no site
@@ -1147,62 +1147,54 @@ class operador_StormVista(navegador):
                 for hora in horario:
                     mapas1 = self.dictmodeloespecifico[modelo]
                     self.idtime = mapas1[mapa]
-                    for c in range(0, 15):
-                        self.driver.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
-                        idimage = '17'
-                        self.sleep(4)
-                        img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
-                        img1.click()
-                        self.sleep(4)
-                        um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
-                        x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
-                        self.sleep(4)
-                        Image1 = self.driver.get_screenshot_as_file(x)
-                        Img = self.Image.open(x)
-                        croppedIm = Img.crop((60, 55, 900, 700))
-                        root_directory = (
-                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
-                        if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
-                            self.os.mkdir(f'{root_directory}\{self.data}')
-                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
-                        elif self.os.path.isdir(f'{root_directory}\{self.data}') is True:
-                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
-                            print("Imagem salva. Pasta já estava criada")
-                    else:
-                        pass
+                    if (self.idtime is None):
+                        continue
+                    self.driver.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
+                    idimage = '17'
+                    self.sleep(4)
+                    img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
+                    img1.click()
+                    self.sleep(4)
+                    um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
+                    x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
+                    self.sleep(4)
+                    Image1 = self.driver.get_screenshot_as_file(x)
+                    Img = self.Image.open(x)
+                    croppedIm = Img.crop((60, 55, 900, 700))
+                    root_directory = (
+                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
+                    if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
+                        self.os.mkdir(f'{root_directory}\{self.data}')
+                    croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
+                    print("Imagem salva. Pasta já estava criada")
+                else:
+                    pass
 
 
     def rodadazero(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
         for mapa in self.mapas2:
             for modelo in self.modelos2:
                 for hora in self.horario2:
-                    mapas1 = self.dictmodeloespecifico[modelo]
-                    self.idtime = mapas1[mapa]
-                    try:
-                        self.driver.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
-                        idimage = '17'
-                        self.sleep(4)
-                        img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
-                        img1.click()
-                        self.sleep(4)
-                        um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
-                        x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
-                        Image1 = self.driver.get_screenshot_as_file(x)
-                        Img = self.Image.open(x)
-                        croppedIm = Img.crop((60, 55, 900, 700))
-                        root_directory = (
-                            fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
-                        if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
-                            self.os.mkdir(f'{root_directory}\{self.data}')
-                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
-                            pass
-                        elif self.os.path.isdir(f'{root_directory}\{self.data}') is True:
-                            croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
-                            print("Imagem salva. Pasta já estava criada")
-                            pass
-                    except:
-                        pass
-
+                    percorre = self.dictmodeloespecifico[modelo]
+                    self.idtime = percorre[mapa]
+                    if (self.idtime is None):
+                        continue
+                    self.driver.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
+                    idimage = '17'
+                    self.sleep(4)
+                    img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
+                    img1.click()
+                    self.sleep(4)
+                    um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
+                    x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
+                    Image1 = self.driver.get_screenshot_as_file(x)
+                    Img = self.Image.open(x)
+                    croppedIm = Img.crop((60, 55, 900, 700))
+                    root_directory = (
+                         fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
+                    if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
+                         self.os.mkdir(f'{root_directory}\{self.data}')
+                    croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
 
     def cfsweekly(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
         for c in range(1, 5):
@@ -1215,10 +1207,7 @@ class operador_StormVista(navegador):
                 root_directory = (fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\cfs-weekly')
                 if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
                     self.os.mkdir(f'{root_directory}\{self.data}')
-                    self.request.urlretrieve(url, fr'{root_directory}\{self.data}\{self.data}_cfs_weekly_semana_{c}.png')
-                elif self.os.path.isdir(f'{root_directory}\{self.data}') is True:
-                    self.request.urlretrieve(url, fr'{root_directory}\{self.data}\{self.data}_cfs_weekly_semana_{c}.png')
-                    print("Imagem salva. Pasta já estava criada")
+                self.request.urlretrieve(url, fr'{root_directory}\{self.data}\{self.data}_cfs_weekly_semana_{c}.png')
             else:
                 pass
 
