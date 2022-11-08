@@ -1109,6 +1109,7 @@ class operador_StormVista(navegador):
         self.mapas2 = ['120', '240', '360']
         self.modelos2= ['gfs-suite', 'gfs-ens-suite', 'ecmwf-suite', 'ecmwf-eps-suite', 'cmc-ens-suite']
         self.horario2 = ['00z']
+        self.horario3 = ['00z', '12z']
         navegador.__init__(self, nome_navegador=nome_navegador)
         #self.driver = navegador.driver()
         self.idtime = '0'
@@ -1117,11 +1118,10 @@ class operador_StormVista(navegador):
                                      'gfs-ens-suite': {'120': '0', '240': '20', '360': '40'},
                                      'ecmwf-eps-suite': {'120': '0', '240': '24', '360': '44'},
                                      'cmc-ens-suite': {'120': '0', '240': '20', '360': '40'},
-                                     'ecmwf-suite': {'120': '0', '240': '24'}}
+                                     'ecmwf-suite': {'120': '0', '240': '24', '360': None}}
         self.driver = self.login_site()
 
-    def login_site(self):  # função responsável por fazer login no site
-        ##logando no site
+    def login_site(self): # função responsável por fazer login no site
         f = open(
             r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\phantom_js\mapas_stormvista/login_stormvista.txt')
         user, password = f.readline().split(';')
@@ -1140,8 +1140,13 @@ class operador_StormVista(navegador):
         self.sleep(4)
         return self.driver
 
-    def mapaesp(self, modelos, horario,
-                mapas):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+    def mapaesp(self, modelos, horario, mapas): #mapas modelos e horários que o usuário quiser, via parâmetro
+        if (modelos is None):
+            modelos = self.modelos2
+        if (mapas is None):
+            mapas = self.mapas2
+        if (horario is None):
+            horario = self.horario3
         for mapa in mapas:
             for modelo in modelos:
                 for hora in horario:
@@ -1171,31 +1176,8 @@ class operador_StormVista(navegador):
                 else:
                     pass
 
-    def rodadazero(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
-        for mapa in self.mapas2:
-            for modelo in self.modelos2:
-                for hora in self.horario2:
-                    percorre = self.dictmodeloespecifico[modelo]
-                    self.idtime = percorre[mapa]
-                    if (self.idtime is None):
-                        print(f"Não tem mapa aqui no modelo {modelo} e mapa {mapa}")
-                        continue
-                    self.driver.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
-                    idimage = '17'
-                    self.sleep(4)
-                    img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
-                    img1.click()
-                    self.sleep(4)
-                    um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
-                    x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
-                    Image1 = self.driver.get_screenshot_as_file(x)
-                    Img = self.Image.open(x)
-                    croppedIm = Img.crop((60, 55, 900, 700))
-                    root_directory = (
-                         fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
-                    if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
-                         self.os.mkdir(f'{root_directory}\{self.data}')
-                    croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
+    def rodadazero(self): #baixa os mapas de todos modelos no horário 00z
+       self.mapaesp(mapas=None, modelos=None, horario=['00z'])
 
     def cfsweekly(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
         for c in range(1, 5):
