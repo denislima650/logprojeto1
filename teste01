@@ -1,7 +1,8 @@
 import operadores_Web_2 as opw
 
 mapas123 = opw.operador_StormVista('geck')
-mapas1 =['120']
-modelos=['gfs-ens-suite']
+mapas1 =['120', '240', '360']
+modelos=['gfs-suite', 'gfs-ens-suite', 'ecmwf-eps-suite', 'cmc-ens-suite']
 horario=['00z']
 mapas123.mapaesp(modelos, horario, mapas1)
+mapas123.cfsweekly00z()
