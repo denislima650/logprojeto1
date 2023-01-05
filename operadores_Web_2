@@ -13,8 +13,6 @@ class navegador():
         self.request = urllib.request
         from operadores_locais import operador_local
         self.local = operador_local()
-        from time import sleep
-        self.sleep = sleep
         import selenium
         self.selenium = selenium
         from selenium.common.exceptions import NoSuchElementException
@@ -1107,12 +1105,14 @@ class operador_StormVista(navegador):
         import datetime
         import urllib.request
         self.mapas2 = ['120', '240', '360']
-        self.modelos2= ['gfs-suite', 'gfs-ens-suite', 'ecmwf-suite', 'ecmwf-eps-suite', 'cmc-ens-suite']
+        self.modelos2 = ['gfs-suite', 'gfs-ens-suite', 'ecmwf-suite', 'ecmwf-eps-suite', 'cmc-ens-suite']
         self.horario2 = ['00z']
         self.horario3 = ['00z', '12z']
         navegador.__init__(self, nome_navegador=nome_navegador)
-        #self.driver = navegador.driver()
+        # self.driver = navegador.driver()
         self.idtime = '0'
+        self.root_directory = (
+            fr'C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Imagens/mapas_stormvista')
         self.data = datetime.datetime.today().strftime("%Y%m%d")
         self.dictmodeloespecifico = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
                                      'gfs-ens-suite': {'120': '0', '240': '20', '360': '40'},
@@ -1121,75 +1121,94 @@ class operador_StormVista(navegador):
                                      'ecmwf-suite': {'120': '0', '240': '24', '360': None}}
         self.driver = self.login_site()
 
-    def login_site(self): # função responsável por fazer login no site
+    def espera(self, tempo_espera=4):
+        self.time.sleep(tempo_espera)
+
+    def login_site(self):  # função responsável por fazer login no site
         f = open(
             r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\phantom_js\mapas_stormvista/login_stormvista.txt')
         user, password = f.readline().split(';')
         self.driver.get('https://www.stormvistawxmodels.com/')
         login = self.driver.find_element(self.By.ID, 'edit-name')
         login.click()
-        self.sleep(4)
+        self.espera()
         login.send_keys(user)
-        self.sleep(4)
+        self.espera()
         login = self.driver.find_element(self.By.ID, 'edit-pass')
         login.click()
-        self.sleep(4)
+        self.espera()
         login.send_keys(password)
         login = self.driver.find_element(self.By.ID, 'edit-submit')
         login.click()
-        self.sleep(4)
+        self.espera()
         return self.driver
 
-    def mapaesp(self, modelos, horario, mapas): #mapas modelos e horários que o usuário quiser, via parâmetro
+    def mapaesp(self, modelos, horario, mapas,
+                sobreescrever=False):  # mapas modelos e horários que o usuário quiser, via parâmetro
         if (modelos is None):
-            modelos = self.modelos2
+            modelos = list(self.dictmodeloespecifico.keys())
         if (mapas is None):
-            mapas = self.mapas2
+            mapas = list(self.dictmodeloespecifico['gfs-suite'].keys())
         if (horario is None):
             horario = self.horario3
         for mapa in mapas:
             for modelo in modelos:
                 for hora in horario:
-                    mapas1 = self.dictmodeloespecifico[modelo]
-                    self.idtime = mapas1[mapa]
-                    if (self.idtime is None):
-                        print(f"Não tem mapa aqui no modelo {modelo} e mapa {mapa}")
-                        continue
-                    self.driver.get(f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
-                    idimage = '17'
-                    self.sleep(4)
-                    img1 = self.driver.find_element(self.By.ID, f"time-{self.idtime}")
-                    img1.click()
-                    self.sleep(4)
-                    um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
-                    x = r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\chrome\mapas_stormvista\recorte.png'
-                    self.sleep(4)
-                    Image1 = self.driver.get_screenshot_as_file(x)
-                    Img = self.Image.open(x)
-                    croppedIm = Img.crop((60, 55, 900, 700))
-                    root_directory = (
-                        fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\{modelo}')
-                    if self.os.path.isdir(f'{root_directory}\{self.data}') is False:
-                        self.os.mkdir(f'{root_directory}\{self.data}')
-                    croppedIm.save(f'{root_directory}\{self.data}\{self.data}_{modelo}_{hora}_{mapa}.png')
-                    print("Imagem salva. Pasta já estava criada")
-                else:
-                    pass
+                    try:
+                        idtime = self.dictmodeloespecifico[modelo][mapa]
+                        if (idtime is None):
+                            print(f"Não tem mapa aqui no modelo {modelo} e mapa {mapa}")
+                            continue
+                        self.driver.get(
+                            f'https://www.stormvistawxmodels.com/sv/model/{modelo}/{hora}/sa/3-120-hr-accumulated-qpf')
+                        idimage = '17'
+                        self.espera()
+                        img1 = self.driver.find_element(self.By.ID, f"time-{idtime}")
+                        img1.click()
+                        self.espera()
+                        um = self.driver.find_element(self.By.ID, f'image-overlay-{idimage}')
+                        path_cache = (fr'{self.root_directory}/cache.png')
+                        self.espera()
+                        Image1 = self.driver.get_screenshot_as_file(path_cache)
+                        Img = self.Image.open(path_cache)
+                        croppedIm = Img.crop((60, 55, 900, 700))
+                        diretorio = (fr'{self.root_directory}/{modelo}')
+                        try: self.os.mkdir(fr'{diretorio}/{self.data}')
+                        except: pass
+                        if self.os.path.isdir(f'{diretorio}/{self.data}') is False:
+                            self.os.mkdir(f'{diretorio}/{self.data}')
+                        croppedIm.save(f'{diretorio}/{self.data}/{self.data}_{modelo}_{hora}_{mapa}.png')
+                        print("Imagem salva. Pasta ja estava criada")
+                    except Exception as erro:
+                        pass
+                        print(erro)
+                        print("MAPA INDISPONÍVEL")
+        self.driver.close()
+        self.delete_cache()
 
-    def rodadazero(self): #baixa os mapas de todos modelos no horário 00z
-       self.mapaesp(mapas=None, modelos=None, horario=['00z'])
+    def rodadazero(self):  # baixa os mapas de todos modelos no horário 00z
+        self.mapaesp(mapas=None, modelos=None, horario=['00z'])
 
-    def cfsweekly00z(self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
+    def cfsweekly00z(
+            self):  # baixa um único mapa, de um horário e modelo específicos, que devem ser passados via parâmetro
         for c in range(1, 5):
-                self.sleep(5)
-                self.driver.get(f'https://www.stormvistawxmodels.com/sv/cfs-weekly/sa/{self.data}')
-                QPF = self.driver.find_element(self.By.XPATH, f'/html/body/div[2]/div/div/table[6]/tbody/tr[{c}]/td[5]/a/img[1]')
-                Temp = self.driver.find_element(self.By.XPATH, f'/html/body/div[2]/div/div/table[6]/tbody/tr[{c}]/td[2]/a/img[1]')
-                Precip = self.driver.find_element(self.By.XPATH, f'/html/body/div[2]/div/div/table[6]/tbody/tr[{c}]/td[3]/a/img[1]')
-                dicionario_mapas = {'QPF': QPF, 'Temp': Temp, 'Precip': Precip}
-                root_directory = (fr'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\cfs-weekly')
-                for contador in dicionario_mapas.keys():
-                    url = dicionario_mapas[contador].get_attribute('src')
-                    if not self.os.path.isdir(f'{root_directory}\{self.data}'):
-                        self.os.mkdir(f'{root_directory}\{self.data}')
-                    self.request.urlretrieve(url, fr'{root_directory}\{self.data}\{self.data}_cfs_weekly_semana_{c}_{contador}.png')
+            self.espera()
+            self.driver.get(f'https://www.stormvistawxmodels.com/sv/cfs-weekly/sa/{self.data}')
+            QPF = self.driver.find_element(self.By.XPATH,
+                                           f'/html/body/div[2]/div/div/table[6]/tbody/tr[{c}]/td[5]/a/img[1]')
+            Temp = self.driver.find_element(self.By.XPATH,
+                                            f'/html/body/div[2]/div/div/table[6]/tbody/tr[{c}]/td[2]/a/img[1]')
+            Precip = self.driver.find_element(self.By.XPATH,
+                                              f'/html/body/div[2]/div/div/table[6]/tbody/tr[{c}]/td[3]/a/img[1]')
+            dicionario_mapas = {'QPF': QPF, 'Temp': Temp, 'Precip': Precip}
+            diretorio = (fr'{self.root_directory}/cfs-weekly')
+            for contador in dicionario_mapas.keys():
+                url = dicionario_mapas[contador].get_attribute('src')
+                if not self.os.path.isdir(f'{diretorio}\{self.data}'):
+                    self.os.mkdir(f'{diretorio}\{self.data}')
+                self.request.urlretrieve(url,
+                                         fr'{diretorio}\{self.data}\{self.data}_cfs_weekly_semana_{c}_{contador}.png')
+        self.driver.close()
+
+    def delete_cache(self):
+        self.os.remove(fr'{self.root_directory}/cache.png')
