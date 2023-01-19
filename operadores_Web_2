@@ -7,8 +7,8 @@ class navegador():
         nome_navegador = nome_navegador.lower()
         self.nome_navegador = nome_navegador
         # bibliotecas importantes
-        import requests, datetime, os, sys, pandas, time, shutil, pickle
-        self.rq, self.date, self.os, self.sys, self.pd, self.time, self.shutil, self.pk = requests, datetime, os, sys, pandas, time, shutil, pickle
+        import requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, aspose.pdf, telebot
+        self.rq, self.date, self.os, self.sys, self.pd, self.time, self.shutil, self.pk, self.aw, self.awpdf, self.telebot = requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, aspose.pdf, telebot
         self.join = self.os.path.join
         self.listdir = self.os.listdir
         self.isdir = self.os.path.isdir
@@ -1185,34 +1185,11 @@ class operador_StormVista(navegador):
                         if self.os.path.isdir(f'{diretorio}/{self.data}') is False:
                             self.os.mkdir(f'{diretorio}/{self.data}')
                         croppedIm.save(f'{diretorio}/{self.data}/{self.data}_{modelo}_{hora}_{mapa}.png')
-                        image_1 = self.Image.open(f'{diretorio}/{self.data}/{self.data}_{modelo}_{hora}_{mapa}.png')
-                        im_1 = image_1.convert('RGB')
-                        im_1.save(fr'{diretorio}/{self.data}/{self.data}_{modelo}_{hora}_{mapa}.pdf')
                         print("Imagem salva. Pasta ja estava criada")
                     except Exception as erro:
                         pass
                         print(erro)
                         print("MAPA INDISPONÍVEL")
-        for itens in modelos:
-            diretorio = fr'{self.root_directory}/{itens}/{self.data}'
-            l = self.os.listdir(diretorio)
-            lista_arquivos = []
-            for arquivo in l:
-                if ".pdf" in arquivo:
-                    lista_arquivos.append(arquivo)
-                    self.os.rename(fr"{diretorio}/{arquivo}",
-                          fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\{arquivo}")
-            merger = self.PdfWriter()
-            l = self.os.listdir(diretorio)
-            for pdf in lista_arquivos:
-                merger.append(pdf)
-            merger.write(f"{self.data}_{itens}.pdf")
-            merger.close()
-            diretorio = (fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API")
-            l = self.os.listdir(diretorio)
-            for arquivo in l:
-                if f'{self.data}_{itens}_00z' in arquivo:
-                    self.os.remove(fr"{diretorio}\{arquivo}")
         self.driver.close()
         self.delete_cache()
 
@@ -1239,24 +1216,54 @@ class operador_StormVista(navegador):
                     self.os.mkdir(f'{diretorio}\{self.data}')
                 self.request.urlretrieve(url,
                                          fr'{diretorio}\{self.data}\{self.data}_cfs_weekly_semana_{c}_{contador}.png')
-
-                image_1 = self.Image.open(fr'{diretorio}\{self.data}\{self.data}_cfs_weekly_semana_{c}_{contador}.png')
-                im_1 = image_1.convert('RGB')
-                im_1.save(fr'{diretorio}\{self.data}\{self.data}_cfs_weekly_semana_{c}_{contador}.pdf')
-                self.os.remove(fr'{diretorio}\{self.data}\{self.data}_cfs_weekly_semana_{c}_{contador}.png')
-        diretorio = fr'{self.root_directory}/cfs-weekly/{self.data}'
-        l = self.os.listdir(diretorio)
-        lista_arquivos = []
-        for arquivo in l:
-            if ".pdf" in arquivo:
-                lista_arquivos.append(arquivo)
-                self.os.rename(fr"{diretorio}/{arquivo}", fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\{arquivo}")
-        merger = self.PdfWriter()
-        l = self.os.listdir(diretorio)
-        for pdf in lista_arquivos:
-            merger.append(pdf)
-        merger.write("cfs-weekly.pdf")
-        merger.close()
         self.driver.close()
     def delete_cache(self):
         self.os.remove(fr'{self.root_directory}/cache.png')
+
+    def monta_relatorio_StormVista(self):
+        doc = self.aw.Document()
+        builder = self.aw.DocumentBuilder(doc)
+        builder.font.name = "Bahnschrift"
+        builder.font.bold = True
+        builder.font.size = 20
+        builder.writeln("MAPAS STORMVISTA")
+        builder.writeln()
+        for m in self.modelos2:
+            builder.font.name = "Bahnschrift"
+            builder.font.bold = True
+            builder.font.size = 14
+            builder.writeln()
+            builder.writeln(f"{m.upper()}")
+            for c in range(120, 480, 120):
+                try:
+                    imagem = (
+                        fr'{self.root_directory}\{m}\{self.data}\{self.data}_{m}_00z_{c}.png')
+                    print(imagem)
+                    builder.insert_image(imagem, width=145.00, height=145.00)
+                except:
+                    continue
+            if (m == 'ecmwf-suite'):
+                for c in range(0, 11):
+                    builder.writeln()
+        for c in range(0, 15):
+            builder.writeln()
+        builder.writeln("CFS-WEEKLY")
+        diretorio = (fr'{self.root_directory}\cfs-weekly\{self.data}')
+        lista_mapas_cfs = self.os.listdir(diretorio)
+        for c in lista_mapas_cfs:
+            imagem = (fr'{self.root_directory}\cfs-weekly\{self.data}\{c}')
+            print(imagem)
+            builder.insert_image(imagem, width=145.00, height=145.00)
+        doc.save(fr"{self.data}_MAPAS-STORMVISTA.docx")
+
+    def Telegram(self):
+        CHAVE_API = open(fr'{self.root_directory}/chave_api_botTelegram.txt', 'r')# chave de criação do BOT do telegram via BotFather
+        bot = self.telebot.TeleBot(CHAVE_API.read())
+        def envia_relatorio_StormVista():
+            l = self.os.listdir(self.root_directory)
+            for arquivo in l:
+                chatid = 5942965901
+                if '.pdf' in arquivo:
+                    documento = open(fr'{self.root_directory}\{arquivo}', 'rb')
+                    bot.send_document(chatid, documento)
+        envia_relatorio_StormVista()
