@@ -1256,14 +1256,16 @@ class operador_StormVista(navegador):
             builder.insert_image(imagem, width=145.00, height=145.00)
         doc.save(fr"{self.data}_MAPAS-STORMVISTA.docx")
 
-    def Telegram(self):
+class Telegram(path_arquivo, chatid):
+    def __init__(self):
         CHAVE_API = open(fr'{self.root_directory}/chave_api_botTelegram.txt', 'r')# chave de criação do BOT do telegram via BotFather
-        bot = self.telebot.TeleBot(CHAVE_API.read())
-        def envia_relatorio_StormVista():
-            l = self.os.listdir(self.root_directory)
-            for arquivo in l:
-                chatid = 5942965901
-                if '.pdf' in arquivo:
-                    documento = open(fr'{self.root_directory}\{arquivo}', 'rb')
-                    bot.send_document(chatid, documento)
-        envia_relatorio_StormVista()
+        self.bot = self.telebot.TeleBot(CHAVE_API.read())
+        self.lista_contatos = {{"Mapas_StormVista": -865724017}, {"Denis": 5942965901}}
+    def envia_relatorio_StormVista(self):
+         l = self.os.listdir(self.root_directory)
+         for arquivo in l:
+             chatid = 5942965901
+             if '.pdf' in arquivo:
+                 documento = open(fr'{path_arquivo}', 'rb')
+                 self.bot.send_document(chatid, documento)
+    envia_relatorio_StormVista()
