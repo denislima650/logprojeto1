@@ -1,0 +1,14 @@
+import os, operadores_Web_2 as opw
+
+mapas123 = opw.operador_StormVista('geck')
+mapas =['120', '240', '360']
+modelos=['gfs-suite', 'gfs-ens-suite','ecmwf-suite', 'ecmwf-eps-suite', 'cmc-ens-suite']
+horario=['00z']
+#mapas123.mapaesp(modelos, horario, mapas, True)
+#mapas123.cfsweekly00z()
+#mapas123.monta_relatorio_StormVista()
+
+obj = opw.operador_Telegram('geck')
+contato="Denis"
+path_arquivo=open(fr'C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Imagens/mapas_stormvista/MAPAS_STORMVISTA.pdf','rb')
+obj.envia_documento(contato, path_arquivo)
