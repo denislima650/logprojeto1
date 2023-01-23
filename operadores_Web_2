@@ -7,11 +7,12 @@ class navegador():
         nome_navegador = nome_navegador.lower()
         self.nome_navegador = nome_navegador
         # bibliotecas importantes
-        import requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, aspose.pdf, telebot
-        self.rq, self.date, self.os, self.sys, self.pd, self.time, self.shutil, self.pk, self.aw, self.awpdf, self.telebot = requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, aspose.pdf, telebot
+        import requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, telepot
+        self.rq, self.date, self.os, self.sys, self.pd, self.time, self.shutil, self.pk, self.aw, self.telepot = requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, telepot
         self.join = self.os.path.join
         self.listdir = self.os.listdir
         self.isdir = self.os.path.isdir
+        self.root_directory = (fr'C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Imagens/mapas_stormvista')
         import urllib.request
         self.request = urllib.request
         from operadores_locais import operador_local
@@ -1106,10 +1107,6 @@ class operador_CCEE(navegador):
 
 class operador_StormVista(navegador):
     def __init__(self, nome_navegador):
-        from selenium import webdriver
-        from selenium.webdriver.common.keys import Keys
-        import datetime
-        import urllib.request
         self.mapas2 = ['120', '240', '360']
         self.modelos2 = ['gfs-suite', 'gfs-ens-suite', 'ecmwf-suite', 'ecmwf-eps-suite', 'cmc-ens-suite']
         self.horario2 = ['00z']
@@ -1119,7 +1116,7 @@ class operador_StormVista(navegador):
         self.idtime = '0'
         self.root_directory = (
             fr'C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Imagens/mapas_stormvista')
-        self.data = datetime.datetime.today().strftime("%Y%m%d")
+        self.data = self.date.datetime.today().strftime("%Y%m%d")
         self.dictmodeloespecifico = {'gfs-suite': {'120': '0', '240': '40', '360': '80'},
                                      'gfs-ens-suite': {'120': '0', '240': '20', '360': '40'},
                                      'ecmwf-eps-suite': {'120': '0', '240': '24', '360': '44'},
@@ -1247,25 +1244,20 @@ class operador_StormVista(navegador):
                     builder.writeln()
         for c in range(0, 15):
             builder.writeln()
-        builder.writeln("CFS-WEEKLY")
+            builder.writeln("CFS-WEEKLY")
         diretorio = (fr'{self.root_directory}\cfs-weekly\{self.data}')
         lista_mapas_cfs = self.os.listdir(diretorio)
         for c in lista_mapas_cfs:
-            imagem = (fr'{self.root_directory}\cfs-weekly\{self.data}\{c}')
-            print(imagem)
-            builder.insert_image(imagem, width=145.00, height=145.00)
-        doc.save(fr"{self.data}_MAPAS-STORMVISTA.docx")
+             imagem = (fr'{self.root_directory}\cfs-weekly\{self.data}\{c}')
+             print(imagem)
+             builder.insert_image(imagem, width=145.00, height=145.00)
+             doc.save(fr"{self.data}_MAPAS-STORMVISTA.docx")
 
-class Telegram(path_arquivo, chatid):
-    def __init__(self):
-        CHAVE_API = open(fr'{self.root_directory}/chave_api_botTelegram.txt', 'r')# chave de criação do BOT do telegram via BotFather
-        self.bot = self.telebot.TeleBot(CHAVE_API.read())
-        self.lista_contatos = {{"Mapas_StormVista": -865724017}, {"Denis": 5942965901}}
-    def envia_relatorio_StormVista(self):
-         l = self.os.listdir(self.root_directory)
-         for arquivo in l:
-             chatid = 5942965901
-             if '.pdf' in arquivo:
-                 documento = open(fr'{path_arquivo}', 'rb')
-                 self.bot.send_document(chatid, documento)
-    envia_relatorio_StormVista()
+class operador_Telegram(navegador):
+    def envia_documento(self, contato, path_arquivo):
+         CHAVE_API = open(fr'{self.root_directory}/chave_api_botTelegram.txt','r')  # chave de criação do BOT do telegram via BotFather
+         bot = self.telepot.Bot(CHAVE_API.read())
+         lista_contatos = {"Mapas_StormVista": -865724017, "Denis": 5942965901}
+         chatid = lista_contatos[contato]
+         print(chatid)
+         bot.sendDocument(chatid, path_arquivo)
