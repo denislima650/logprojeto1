@@ -82,7 +82,7 @@ class navegador():
             options = webdriver.FirefoxOptions()
             #options.add_argument("--headless")
             options.add_argument('--disable-logging')
-            options.add_argument('--headless')
+            #options.add_argument('--headless')
 
 
         if('chrome' in nome_navegador):
@@ -1251,7 +1251,7 @@ class operador_StormVista(navegador):
              imagem = (fr'{self.root_directory}\cfs-weekly\{self.data}\{c}')
              print(imagem)
              builder.insert_image(imagem, width=145.00, height=145.00)
-             doc.save(fr"{self.data}_MAPAS-STORMVISTA.docx")
+             doc.save(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\{self.data}_MAPAS-STORMVISTA.docx")
 
 class operador_Telegram(navegador):
     def envia_documento(self, contato, path_arquivo):
@@ -1259,5 +1259,78 @@ class operador_Telegram(navegador):
          bot = self.telepot.Bot(CHAVE_API.read())
          lista_contatos = {"Mapas_StormVista": -865724017, "Denis": 5942965901}
          chatid = lista_contatos[contato]
-         print(chatid)
          bot.sendDocument(chatid, path_arquivo)
+
+class operador_notifica_leiloes(navegador):
+    def __init__(self, nome_navegador):
+        navegador.__init__(self, nome_navegador=nome_navegador)
+        self.root_directory = (
+            fr'C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Imagens/mapas_stormvista')
+        self.data = self.date.datetime.today().strftime("%Y%m%d")
+        self.sites_leiloes = {'ACR': {'https://www.canalenergia.com.br/tipo-leilao/acr/'},
+                              'ACL': {'https://www.canalenergia.com.br/tipo-leilao/acl/'},
+                              'Eletronorte': {'https://www.eletronorte.com.br/leilao-de-energia/'},
+                              'Chesf': {'https://www.chesf.com.br/Negocios/Pages/Comercializa%C3%A7%C3%A3o/LeilaoVendaChesf.aspx'},
+                              'Eletrosul': {'https://www.cgteletrosul.com.br/nosso-negocio/comercializacao/editais-de-leilao-e-chamadas-publicas'},
+                              'Jirau Energia': {'https://www.jirauenergia.com.br/comercializacao/#leiloes'}}
+        self.driver = self.login_site()
+    def espera(self, tempo_espera=2):
+        self.time.sleep(tempo_espera)
+
+    def login_site(self):  # função responsável por fazer login no site
+        f = open(
+            r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\phantom_js\mapas_stormvista/login_leiloes.txt')
+        user, password = f.readline().split(';')
+        self.driver.get('https://www.canalenergia.com.br/')
+        self.driver.maximize_window()
+        login = self.driver.find_element(self.By.ID, "login-button")
+        login.click()
+        self.espera()
+        login = self.driver.find_element(self.By.ID, "txtUserName")
+        login.click()
+        login.send_keys(user)
+        self.espera()
+        login = self.driver.find_element(self.By.NAME, 'passwordL')
+        login.click()
+        login.send_keys(password)
+        self.espera()
+        login = self.driver.find_element(self.By.CLASS_NAME, 'btn-login')
+        self.espera()
+        login.click()
+        return self.driver
+
+    def procura_leiloes(self):
+        canal_energia = ['l', 'r']
+        for i in canal_energia:
+            self.driver.get(f'https://www.canalenergia.com.br/tipo-leilao/ac{i}/')
+            resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH, "/html/body/div[1]/div/div[1]/section[1]")  # acesso a classe que mostra os resultados da pesquisa
+            resultado_da_pesquisa = resultado_da_pesquisa[:5]  # Capturo os 3 primeiros resultados da busca
+            for resultado in resultado_da_pesquisa:
+                print(resultado.text)  # Exibo o texto da busca
+        self.driver.get('https://www.eletronorte.com.br/leilao-de-energia/')
+        resultado_da_pesquisa = self.driver.find_elements(self.By.ID, 'nz-content')  # acesso a classe que mostra os resultados da pesquisa
+        resultado_da_pesquisa = resultado_da_pesquisa[:5]  # Capturo os 3 primeiros resultados da busca
+        print("ELETRONORTE")
+        for resultado in resultado_da_pesquisa:
+            print(resultado.text)  # Exibo o texto da busca
+
+        self.driver.get('https://www.chesf.com.br/Negocios/Pages/Comercializa%C3%A7%C3%A3o/LeilaoVendaChesf.aspx')
+        resultado_da_pesquisa = self.driver.find_elements(self.By.CLASS_NAME, "csf-fsize")  # acesso a classe que mostra os resultados da pesquisa
+        resultado_da_pesquisa = resultado_da_pesquisa[:3]  # Capturo os 3 primeiros resultados da busca
+        print("CHESF\n")
+        for resultado in resultado_da_pesquisa:
+            print(resultado.text)  # Exibo o texto da busca
+
+        self.driver.get('https://www.cgteletrosul.com.br/nosso-negocio/comercializacao/editais-de-leilao-e-chamadas-publicas')
+        resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH,"/html/body/div[1]/div[2]/div/div[4]/div[2]/div[3]/div[1]")  # acesso a classe que mostra os resultados da pesquisa
+        resultado_da_pesquisa = resultado_da_pesquisa[:3]  # Capturo os 3 primeiros resultados da busca
+        print("ELETROSUL\n")
+        for resultado in resultado_da_pesquisa:
+            print(resultado.text)  # Exibo o texto da busca
+
+
+
+
+
+
+
