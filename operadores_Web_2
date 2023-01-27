@@ -1327,10 +1327,3 @@ class operador_notifica_leiloes(navegador):
         print("ELETROSUL\n")
         for resultado in resultado_da_pesquisa:
             print(resultado.text)  # Exibo o texto da busca
-
-
-
-
-
-
-
