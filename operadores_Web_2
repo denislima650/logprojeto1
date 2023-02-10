@@ -1308,12 +1308,12 @@ class operador_notifica_leiloes(navegador):
         try:
             for i in canal_energia:
                 self.driver.get(f'https://www.canalenergia.com.br/tipo-leilao/{i}/')
-                resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH, "/html/body/div[1]/div/div[1]/section[1]")  # acesso a classe que mostra os resultados da pesquisa
+                resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH, "/html/body/div[1]/div/div[1]/section[3]")  # acesso a classe que mostra os resultados da pesquisa
                 resultado_da_pesquisa = resultado_da_pesquisa[:5]  # Capturo os 3 primeiros resultados da busca
                 if i == 'acl':
-                    lista.append(f'1. CANAL ENERGIA - {i.upper()}')
+                    lista.append(f'1. CANAL ENERGIA - {i.upper()}:')
                 else:
-                    lista.append(f'2. CANAL ENERGIA - {i.upper()}')
+                    lista.append(f'2. CANAL ENERGIA - {i.upper()}:')
                 for resultado in resultado_da_pesquisa:
                     lista.append("-------------------------------------------------")
                     lista.append(resultado.text+"\n")
@@ -1353,13 +1353,19 @@ class operador_notifica_leiloes(navegador):
             builder.write(f"{l}")
             builder.writeln()
         doc.save(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt")
+        self.driver.close()
         try:
-            with open(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'r') as fr:
+            with open(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'r', encoding='utf8') as fr:
                 lines = fr.readlines()
-                with open(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'w') as fw:
-                    for line in lines:
-                        if line.find('Created with') == -1:
-                            fw.write(line)
+            with open(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'w', encoding='utf8') as fw:
+                 for line in lines:
+                     if 'Aneel - Geração' in line:
+                         fw.write(line)
+                         fw.write("\n")
+                     if line.find('Aspose') == -1:
+                         fw.write(line)
             print("Deleted")
         except:
             print("Oops! someting error")
+
+
