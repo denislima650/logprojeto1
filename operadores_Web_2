@@ -1311,12 +1311,12 @@ class operador_notifica_leiloes(navegador):
                 resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH, "/html/body/div[1]/div/div[1]/section[1]")  # acesso a classe que mostra os resultados da pesquisa
                 resultado_da_pesquisa = resultado_da_pesquisa[:5]  # Capturo os 3 primeiros resultados da busca
                 if i == 'acl':
-                    lista.append(f'1.{i.upper()}')
+                    lista.append(f'1. CANAL ENERGIA - {i.upper()}')
                 else:
-                    lista.append(f'2.{i.upper()}')
+                    lista.append(f'2. CANAL ENERGIA - {i.upper()}')
                 for resultado in resultado_da_pesquisa:
                     lista.append("-------------------------------------------------")
-                    lista.append(resultado.text)
+                    lista.append(resultado.text+"\n")
                     lista.append("-------------------------------------------------")
                 lista.append("")
         except:
@@ -1356,7 +1356,6 @@ class operador_notifica_leiloes(navegador):
         try:
             with open(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'r') as fr:
                 lines = fr.readlines()
-                #ptr = 1
                 with open(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'w') as fw:
                     for line in lines:
                         if line.find('Created with') == -1:
@@ -1364,5 +1363,3 @@ class operador_notifica_leiloes(navegador):
             print("Deleted")
         except:
             print("Oops! someting error")
-
-
