@@ -1341,11 +1341,11 @@ class operador_notifica_leiloes(navegador):
             lista.append(resultado.text)
             c+=1
         lista.append("")
-
+        data2 = self.date.datetime.today().strftime("%d/%m/%Y")
         doc = self.aw.Document() #MONTAGEM DO TXT
         builder = self.aw.DocumentBuilder(doc)
         builder.write("-------------------------------------------------\n")
-        builder.write(f"RESULTADO DA PESQUISA POR LEILÕES NO DIA {dia}\n")
+        builder.write(f"RESULTADO DA PESQUISA POR LEILÕES NO DIA {data2}:\n")
         builder.write("-------------------------------------------------\n")
         builder.writeln()
         builder.writeln()
