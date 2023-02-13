@@ -1318,13 +1318,16 @@ class operador_notifica_leiloes(navegador):
         lista.append("")
         f = open(fr'{self.root_directory}/relatorio_mapas-stormvista/LEILÕES/login_email.txt')
         username, password = f.readline().split(';')
-        meu_email = self.MailBox('imap.outlook.office365.com').login(username, password)
-        lista_emails = meu_email.fetch(self.AND(subject='Chamada', to="denis.lima@logenergia.com.br"))
         lista.append(f"5.{lista2[4]}:")
-        for email in lista_emails:
-            print(email.subject, email.from_)
-            print(email.text)
-            lista.append(email.subject)
+        try:
+            meu_email = self.MailBox('imap.gmail.com').login(username, password)
+            lista_emails = meu_email.fetch(self.AND(subject='Leilão'))
+            for email in lista_emails:
+                print(email.subject)
+                print(email.text)
+                lista.append(email.subject)
+        except Exception as erro:
+            lista.append("NENHUM LEILÃO ENCONTRADO!")
         lista.append("")
 
         data2 = self.date.datetime.today().strftime("%d/%m/%Y")
