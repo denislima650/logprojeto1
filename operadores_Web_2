@@ -35,7 +35,9 @@ class navegador():
         from selenium.webdriver.common.by import By
         self.By = By
         import numpy
-        #
+        from imap_tools import MailBox, AND
+        self.MailBox = MailBox
+        self.AND = AND
         #from webdriver_manager.chrome import ChromeDriverManager
         #
         from selenium.webdriver.chrome.service import Service
@@ -1266,45 +1268,17 @@ class operador_notifica_leiloes(navegador):
         navegador.__init__(self, nome_navegador=nome_navegador)
         self.root_directory = (
             fr'C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Imagens/mapas_stormvista')
-        self.sites_leiloes = {'ACR': {'https://www.canalenergia.com.br/tipo-leilao/acr/'},
-                              'ACL': {'https://www.canalenergia.com.br/tipo-leilao/acl/'},
-                              'Eletronorte': {'https://www.eletronorte.com.br/leilao-de-energia/'},
-                              'Chesf': {'https://www.chesf.com.br/Negocios/Pages/Comercializa%C3%A7%C3%A3o/LeilaoVendaChesf.aspx'},
-                              'Eletrosul': {'https://www.cgteletrosul.com.br/nosso-negocio/comercializacao/editais-de-leilao-e-chamadas-publicas'},
-                              'Jirau Energia': {'https://www.jirauenergia.com.br/comercializacao/#leiloes'}}
         #self.driver = self.login_site()
 
     def espera(self, tempo_espera=2):
         self.time.sleep(tempo_espera)
 
-    def login_site(self):  # função responsável por fazer login no site
-        f = open(
-            r'C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Scripts\Preco\API\Drivers\phantom_js\mapas_stormvista/login_leiloes.txt')
-        user, password = f.readline().split(';')
-        self.driver.get('https://www.canalenergia.com.br/')
-        self.driver.maximize_window()
-        self.espera()
-        login = self.driver.find_element(self.By.ID, "login-button")
-        login.click()
-        self.espera()
-        login = self.driver.find_element(self.By.ID, "txtUserName")
-        login.click()
-        login.send_keys(user)
-        self.espera()
-        login = self.driver.find_element(self.By.NAME, 'passwordL')
-        login.click()
-        login.send_keys(password)
-        self.espera()
-        login = self.driver.find_element(self.By.CLASS_NAME, 'btn-login')
-        self.espera()
-        login.click()
-        return self.driver
-
     def procura_leiloes(self):
+        from imap_tools import MailBox, AND
         canal_energia = ['acl', 'acr']
         dia = self.date.datetime.today().strftime('%Y%m%d')
         lista=[]
-        lista2 = ['ACL', 'ACR', 'ELETRONORTE', 'CHESF']
+        lista2 = ['ACL', 'ACR', 'ELETRONORTE', 'CHESF', 'LEILÕES ENVIADOS POR E-MAIL']
         try:
             for i in canal_energia:
                 self.driver.get(f'https://www.canalenergia.com.br/tipo-leilao/{i}/')
@@ -1339,8 +1313,20 @@ class operador_notifica_leiloes(navegador):
             if c==3:
                 break
             lista.append(resultado.text)
+            lista.append("-------------------------------------------------")
             c+=1
         lista.append("")
+        f = open(fr'{self.root_directory}/relatorio_mapas-stormvista/LEILÕES/login_email.txt')
+        username, password = f.readline().split(';')
+        meu_email = self.MailBox('imap.outlook.office365.com').login(username, password)
+        lista_emails = meu_email.fetch(self.AND(subject='Chamada', to="denis.lima@logenergia.com.br"))
+        lista.append(f"5.{lista2[4]}:")
+        for email in lista_emails:
+            print(email.subject, email.from_)
+            print(email.text)
+            lista.append(email.subject)
+        lista.append("")
+
         data2 = self.date.datetime.today().strftime("%d/%m/%Y")
         doc = self.aw.Document() #MONTAGEM DO TXT
         builder = self.aw.DocumentBuilder(doc)
@@ -1352,12 +1338,12 @@ class operador_notifica_leiloes(navegador):
         for l in lista:
             builder.write(f"{l}")
             builder.writeln()
-        doc.save(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt")
+        doc.save(fr"{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt")
         self.driver.close()
         try:
-            with open(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'r', encoding='utf8') as fr:
+            with open(fr"{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'r', encoding='utf8') as fr:
                 lines = fr.readlines()
-            with open(fr"C:\Log\OneDrive - GALAPAGOS CAPITAL\5.MIDDLE\Imagens\mapas_stormvista\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'w', encoding='utf8') as fw:
+            with open(fr"{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'w', encoding='utf8') as fw:
                  for line in lines:
                      if 'Aneel - Geração' in line:
                          fw.write(line)
