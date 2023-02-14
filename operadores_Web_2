@@ -1289,9 +1289,9 @@ class operador_notifica_leiloes(navegador):
                 else:
                     lista.append(f'2. CANAL ENERGIA - {i.upper()}:')
                 for resultado in resultado_da_pesquisa:
-                    lista.append("-------------------------------------------------")
+                    lista.append("----------------------------------------------------")
                     lista.append(resultado.text+"\n")
-                    lista.append("-------------------------------------------------")
+                    lista.append("----------------------------------------------------")
                 lista.append("")
         except:
             pass
@@ -1301,7 +1301,7 @@ class operador_notifica_leiloes(navegador):
         lista.append(f"3.{lista2[2]}:")
         for resultado in resultado_da_pesquisa:
             lista.append(resultado.text)
-            lista.append("-------------------------------------------------")
+            lista.append("----------------------------------------------------")
         lista.append("")
 
         self.driver.get('https://www.chesf.com.br/Negocios/Pages/Comercializa%C3%A7%C3%A3o/leilao-de-venda-de-energia.aspx')
@@ -1313,7 +1313,7 @@ class operador_notifica_leiloes(navegador):
             if c==3:
                 break
             lista.append(resultado.text)
-            lista.append("-------------------------------------------------")
+            lista.append("----------------------------------------------------")
             c+=1
         lista.append("")
         f = open(fr'{self.root_directory}/relatorio_mapas-stormvista/LEILÕES/login_email.txt')
@@ -1333,9 +1333,9 @@ class operador_notifica_leiloes(navegador):
         data2 = self.date.datetime.today().strftime("%d/%m/%Y")
         doc = self.aw.Document() #MONTAGEM DO TXT
         builder = self.aw.DocumentBuilder(doc)
-        builder.write("-------------------------------------------------\n")
+        builder.write("----------------------------------------------------\n")
         builder.write(f"RESULTADO DA PESQUISA POR LEILÕES NO DIA {data2}:\n")
-        builder.write("-------------------------------------------------\n")
+        builder.write("----------------------------------------------------\n")
         builder.writeln()
         builder.writeln()
         for l in lista:
