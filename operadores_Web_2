@@ -7,8 +7,8 @@ class navegador():
         nome_navegador = nome_navegador.lower()
         self.nome_navegador = nome_navegador
         # bibliotecas importantes
-        import requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, telepot
-        self.rq, self.date, self.os, self.sys, self.pd, self.time, self.shutil, self.pk, self.aw, self.telepot = requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, telepot
+        import requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, telepot, win32com.client
+        self.rq, self.date, self.os, self.sys, self.pd, self.time, self.shutil, self.pk, self.aw, self.telepot, self.w32 = requests, datetime, os, sys, pandas, time, shutil, pickle, aspose.words, telepot, win32com.client
         self.join = self.os.path.join
         self.listdir = self.os.listdir
         self.isdir = self.os.path.isdir
@@ -1274,7 +1274,6 @@ class operador_notifica_leiloes(navegador):
         self.time.sleep(tempo_espera)
 
     def procura_leiloes(self):
-        from imap_tools import MailBox, AND
         canal_energia = ['acl', 'acr']
         dia = self.date.datetime.today().strftime('%Y%m%d')
         lista=[]
@@ -1296,7 +1295,7 @@ class operador_notifica_leiloes(navegador):
         except:
             pass
         self.driver.get('https://www.eletronorte.com.br/leilao-de-energia/')
-        resultado_da_pesquisa = self.driver.find_elements(self.By.ID, 'nz-content')  # acesso a classe que mostra os resultados da pesquisa
+        resultado_da_pesquisa = self.driver.find_elements(self.By.ID, 'content')  # acesso a classe que mostra os resultados da pesquisa
         resultado_da_pesquisa = resultado_da_pesquisa[:5]  # Capturo os 3 primeiros resultados da busca
         lista.append(f"3.{lista2[2]}:")
         for resultado in resultado_da_pesquisa:
@@ -1316,20 +1315,21 @@ class operador_notifica_leiloes(navegador):
             lista.append("----------------------------------------------------")
             c+=1
         lista.append("")
-        f = open(fr'{self.root_directory}/relatorio_mapas-stormvista/LEILÕES/login_email.txt')
-        username, password = f.readline().split(';')
-        lista.append(f"5.{lista2[4]}:")
-        try:
-            meu_email = self.MailBox('imap.gmail.com').login(username, password)
-            lista_emails = meu_email.fetch(self.AND(subject='Leilão'))
-            for email in lista_emails:
-                print(email.subject)
-                print(email.text)
-                lista.append(email.subject)
-        except Exception as erro:
-            lista.append("NENHUM LEILÃO ENCONTRADO!")
-        lista.append("")
 
+        outlook = self.w32.GetActiveObject("Outlook.Application").GetNamespace("MAPI")
+        inbox = outlook.GetDefaultFolder(6).Items
+        msg = list(inbox)
+        lista.append(f"5.{lista2[4]}:")
+        palavras_chave=['LEILÃO', 'LEILÕES', 'Leilões', 'Chamada', 'CHAMADA', 'COTAÇÃO']
+        try:
+            for c in palavras_chave:
+                for m in msg:
+                    if c in m.Subject:
+                        lista.append(m.Subject)
+                        lista.append("")
+        except Exception as erro:
+            print(erro)
+        lista.append("----------------------------------------------------")
         data2 = self.date.datetime.today().strftime("%d/%m/%Y")
         doc = self.aw.Document() #MONTAGEM DO TXT
         builder = self.aw.DocumentBuilder(doc)
@@ -1341,13 +1341,22 @@ class operador_notifica_leiloes(navegador):
         for l in lista:
             builder.write(f"{l}")
             builder.writeln()
+        for c in range(0, 3):
+            builder.writeln()
+        f = open(fr'{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\referencias.txt', 'r', encoding='utf8')
+        referencias = f.readlines()
+        for contador in referencias:
+            builder.write(contador)
         doc.save(fr"{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt")
         self.driver.close()
+
         try:
             with open(fr"{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'r', encoding='utf8') as fr:
                 lines = fr.readlines()
             with open(fr"{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'w', encoding='utf8') as fw:
                  for line in lines:
+                     if '02/2022' in line:
+                         fw.write("NENHUM LEILÃO PARA O ANO ATUAL!\n")
                      if 'Aneel - Geração' in line:
                          fw.write(line)
                          fw.write("\n")
@@ -1356,5 +1365,3 @@ class operador_notifica_leiloes(navegador):
             print("Deleted")
         except:
             print("Oops! someting error")
-
-
