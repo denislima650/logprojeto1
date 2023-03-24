@@ -1,7 +1,4 @@
 # classe que inicializa o navegador
-import os
-
-
 class navegador():
     def __init__(self, nome_navegador):
         nome_navegador = nome_navegador.lower()
@@ -1266,38 +1263,33 @@ class operador_Telegram(navegador):
 class operador_notifica_leiloes(navegador):
     def __init__(self, nome_navegador):
         navegador.__init__(self, nome_navegador=nome_navegador)
-        self.root_directory = (
-            fr'C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Imagens/mapas_stormvista')
+        self.root_directory = (fr'C:/Log/OneDrive - GALAPAGOS CAPITAL/5.MIDDLE/Imagens/mapas_stormvista')
         #self.driver = self.login_site()
 
     def espera(self, tempo_espera=2):
         self.time.sleep(tempo_espera)
 
     def procura_leiloes(self):
-        canal_energia = ['acl', 'acr']
         dia = self.date.datetime.today().strftime('%Y%m%d')
         lista=[]
-        lista2 = ['ACL', 'ACR', 'ELETRONORTE', 'CHESF', 'LEILÕES ENVIADOS POR E-MAIL']
+        lista2 = ['CANAL ENERGIA', 'ELETRONORTE', 'CHESF', 'LEILÕES ENVIADOS POR E-MAIL']
         try:
-            for i in canal_energia:
-                self.driver.get(f'https://www.canalenergia.com.br/tipo-leilao/{i}/')
-                resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH, "/html/body/div[1]/div/div[1]/section[3]")  # acesso a classe que mostra os resultados da pesquisa
-                resultado_da_pesquisa = resultado_da_pesquisa[:5]  # Capturo os 3 primeiros resultados da busca
-                if i == 'acl':
-                    lista.append(f'1. CANAL ENERGIA - {i.upper()}:')
-                else:
-                    lista.append(f'2. CANAL ENERGIA - {i.upper()}:')
-                for resultado in resultado_da_pesquisa:
-                    lista.append("----------------------------------------------------")
-                    lista.append(resultado.text+"\n")
-                    lista.append("----------------------------------------------------")
-                lista.append("")
-        except:
+           self.driver.get(f'https://www.canalenergia.com.br/tipo-leilao/acl#leiloes-categories-tabs')
+           resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH, '/html/body/main/div[1]/div[3]/div[2]')  # acesso a classe que mostra os resultados da pesquisa
+           resultado_da_pesquisa = resultado_da_pesquisa[:5]  # Capturo os 3 primeiros resultados da busca
+           lista.append(f'1. CANAL ENERGIA:')
+           for resultado in resultado_da_pesquisa:
+                 lista.append("----------------------------------------------------")
+                 lista.append(resultado.text+"\n")
+                 lista.append("----------------------------------------------------")
+                 lista.append("")
+        except Exception as erro:
+            print(erro)
             pass
         self.driver.get('https://www.eletronorte.com.br/leilao-de-energia/')
-        resultado_da_pesquisa = self.driver.find_elements(self.By.ID, 'content')  # acesso a classe que mostra os resultados da pesquisa
+        resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH, '//*[@id="content"]')  # acesso a classe que mostra os resultados da pesquisa
         resultado_da_pesquisa = resultado_da_pesquisa[:5]  # Capturo os 3 primeiros resultados da busca
-        lista.append(f"3.{lista2[2]}:")
+        lista.append(f"2.{lista2[1]}:")
         for resultado in resultado_da_pesquisa:
             lista.append(resultado.text)
             lista.append("----------------------------------------------------")
@@ -1306,7 +1298,7 @@ class operador_notifica_leiloes(navegador):
         self.driver.get('https://www.chesf.com.br/Negocios/Pages/Comercializa%C3%A7%C3%A3o/leilao-de-venda-de-energia.aspx')
         resultado_da_pesquisa = self.driver.find_elements(self.By.XPATH, '//*[@id="ctl00_PlaceHolderMain_ctl04__ControlWrapper_RichHtmlField"]/div[1]')  # acesso a classe que mostra os resultados da pesquisa
         resultado_da_pesquisa = resultado_da_pesquisa[0:5]  # Capturo os 3 primeiros resultados da busca
-        lista.append(f"4.{lista2[3]}:")
+        lista.append(f"3.{lista2[2]}:")
         c=0
         for resultado in resultado_da_pesquisa:
             if c==3:
@@ -1319,7 +1311,7 @@ class operador_notifica_leiloes(navegador):
         outlook = self.w32.GetActiveObject("Outlook.Application").GetNamespace("MAPI")
         inbox = outlook.GetDefaultFolder(6).Items
         msg = list(inbox)
-        lista.append(f"5.{lista2[4]}:")
+        lista.append(f"4.{lista2[3]}:")
         palavras_chave=['LEILÃO', 'LEILÕES', 'Leilões', 'Chamada', 'CHAMADA', 'COTAÇÃO']
         try:
             for c in palavras_chave:
@@ -1354,14 +1346,18 @@ class operador_notifica_leiloes(navegador):
             with open(fr"{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'r', encoding='utf8') as fr:
                 lines = fr.readlines()
             with open(fr"{self.root_directory}\relatorio_mapas-stormvista\LEILÕES\{dia}_busca_leilões.txt", 'w', encoding='utf8') as fw:
-                 for line in lines:
-                     if '02/2022' in line:
-                         fw.write("NENHUM LEILÃO PARA O ANO ATUAL!\n")
-                     if 'Aneel - Geração' in line:
-                         fw.write(line)
-                         fw.write("\n")
-                     if line.find('Aspose') == -1:
-                         fw.write(line)
-            print("Deleted")
+                for line in lines:
+                    if 'Evaluation' in line:
+                        fw.write('')
+                    if 'ANEEL - GERAÇÃO' in line:
+                        fw.write(line)
+                        fw.write('\n')
+                    if 'A Eletronorte promove' in line:
+                        fw.write("")
+                        fw.write("NENHUM LEILÃO PARA O ANO ATUAL!\n")
+                    if line.find('Aspose') == -1:
+                        fw.write(line)
+                    else:
+                        fw.write(line)
         except:
             print("Oops! someting error")
